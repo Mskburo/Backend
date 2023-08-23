@@ -6,8 +6,8 @@ services:
     container_name: pg_db
     restart: always
     environment:
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=root_pg
+      - POSTGRES_USER=&{PG_USER}
+      - POSTGRES_PASSWORD=&{PG_PASSWORD}
       - POSTGRES_DB=tours
     volumes:
       - db_pg_volume:/var/lib/postgresql/data/
