@@ -1,0 +1,1 @@
+docker compose -f ./rel.docker-compose.yaml --env-file .env.rel up --build -d
