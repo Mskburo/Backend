@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::models::excursion::Excursion;
 use crate::schema::{customers_types, customers_type_costs};
 
-#[derive(Queryable, Selectable, Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Queryable,AsChangeset, Selectable, Debug, PartialEq, Deserialize, Serialize)]
 #[diesel(table_name = customers_types)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct CustomersTypes{
