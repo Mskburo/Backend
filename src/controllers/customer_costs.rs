@@ -10,7 +10,7 @@ use crate::AppState;
 
 //CREATE
 #[post("/excursions/costs")]
-async fn add_customer_type(
+async fn add_customer_cost(
     app_state: web::Data<AppState>,
     json: web::Json<CustomersTypeCosts>,
 ) -> HttpResponse {
@@ -40,34 +40,18 @@ async fn add_customer_type(
 }
 
 //READ
-#[get("/excursions/costs/type")]
-async fn get_customer_type(app_state: web::Data<AppState>) -> HttpResponse {
-    match app_state.db.get().await {
-        Ok(mut conn) => match customers_type_costs.load::<CustomersTypeCosts>(&mut conn).await {
-            Ok(types) => HttpResponse::Ok().json(types),
-            Err(err) => {
-                warn!("Database error: {}", err);
-                HttpResponse::InternalServerError().body(format!("Database error: {}", err))
-            }
-        },
-        Err(err) => {
-            error!("Database connection error: {}", err);
-            HttpResponse::InternalServerError().body(format!("Database connection error: {}", err))
-        }
-    }
-}
-
-#[get("/excursions/costs/type/{customer_type_id}")]
-async fn get_excursion_by_id(
+#[get("/excursions/costs/{excursion_id}")]
+async fn get_customer_cost_by_ex_id(
     app_state: web::Data<AppState>,
-    customer_type_id: web::Path<i32>,
+    path: web::Path<i32>,
 ) -> HttpResponse {
-    let customer_type_id = customer_type_id.into_inner();
+    let excursion = path.into_inner();
 
     match app_state.db.get().await {
         Ok(mut conn) => {
+            
             match customers_type_costs
-                .find(customer_type_id)
+                .find(excursion)
                 .select(CustomersTypeCosts::as_select())
                 .first(&mut conn)
                 .await
@@ -87,19 +71,19 @@ async fn get_excursion_by_id(
 }
 
 //Update
-#[post("/excursions/{customer_type_id}")]
-async fn update_excursion_by_id(
+#[post("/excursions/costs/{customer_cost_id}")]
+async fn update_customer_cost_by_id(
     app_state: web::Data<AppState>,
     json: web::Json<CustomersTypeCosts>,
-    customer_type_id: web::Path<i32>,
+    customer_cost_id: web::Path<i32>,
 ) -> HttpResponse {
-    let customer_type_id = customer_type_id.into_inner();
+    let customer_cost_id = customer_cost_id.into_inner();
 
     match app_state.db.get().await {
         Ok(mut conn) => {
             match diesel::update(
                 customers_type_costs
-                    .filter(crate::schema::customers_type_costs::columns::id.eq(customer_type_id)),
+                    .filter(crate::schema::customers_type_costs::columns::id.eq(customer_cost_id)),
             )
             .set(json.into_inner())
             .execute(&mut conn)
@@ -126,25 +110,25 @@ async fn update_excursion_by_id(
 }
 
 //DELETE
-#[delete("/excursions/{excursion_id}")]
-async fn delete_excursion_by_id(
+#[delete("/excursions/costs/{excursion_id}")]
+async fn delete_customer_cost_by_id(
     app_state: web::Data<AppState>,
-    customer_type_id: web::Path<i32>,
+    customer_cost_id: web::Path<i32>,
 ) -> HttpResponse {
-    let customer_type_id = customer_type_id.into_inner();
+    let customer_cost_id = customer_cost_id.into_inner();
 
     match app_state.db.get().await {
         Ok(mut conn) => {
             match diesel::delete(
                 customers_type_costs
-                    .filter(crate::schema::customers_type_costs::columns::id.eq(customer_type_id)),
+                    .filter(crate::schema::customers_type_costs::columns::id.eq(customer_cost_id)),
             )
             .execute(&mut conn)
             .await
             {
                 Ok(deleted_rows) => {
                     if deleted_rows > 0 {
-                        HttpResponse::Ok().body(format!("{} excursion deleted", customer_type_id))
+                        HttpResponse::Ok().body(format!("{} excursion deleted", customer_cost_id))
                     } else {
                         HttpResponse::NotFound().body("Excursion not found")
                     }
