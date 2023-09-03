@@ -78,7 +78,7 @@ async fn main() -> std::io::Result<()> {
                 ))
                 //ADMIN
                 .service(
-                    web::scope("/excursions")
+                    web::scope("/admin/excursions")
                         .service(add_excursion)
                         .service(delete_excursion_by_id)
                         .service(update_excursion_by_id)

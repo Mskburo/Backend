@@ -40,7 +40,7 @@ async fn add_excursion(app_state: web::Data<AppState>, json: web::Json<Excursion
 }
 
 //READ
-#[get("")]
+#[get("/")]
 async fn get_all_excursions(app_state: web::Data<AppState>) -> HttpResponse {
     match app_state.db.get().await {
         Ok(mut conn) => match excursion.load::<Excursion>(&mut conn).await {

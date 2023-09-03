@@ -22,7 +22,7 @@ CREATE TABLE excursion (
 );
 
 CREATE TABLE customers_type_costs (
-  id integer NOT NULL,
+  id serial NOT NULL,
   customers_types_id integer NOT NULL,
   cost float NOT NULL,
   excursion_id integer NOT NULL,

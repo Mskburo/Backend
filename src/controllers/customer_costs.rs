@@ -21,7 +21,7 @@ async fn add_customer_cost(
                 .await
             {
                 Ok(inserted_rows) => {
-                    HttpResponse::Ok().body(format!("{} customer type(s) added", inserted_rows))
+                    HttpResponse::Ok().body(format!("{} customer cost(s) added", inserted_rows))
                 }
                 Err(err) => {
                     warn!("Database error: {}", err);
@@ -87,7 +87,7 @@ async fn update_customer_cost_by_id(
             {
                 Ok(updated_rows) => {
                     if updated_rows > 0 {
-                        HttpResponse::Ok().body(format!("{} excursion(s) updated", updated_rows))
+                        HttpResponse::Ok().body(format!("{} customer cost(s) updated", updated_rows))
                     } else {
                         HttpResponse::NotFound().body("Excursion not found")
                     }
@@ -124,7 +124,7 @@ async fn delete_customer_cost_by_id(
             {
                 Ok(deleted_rows) => {
                     if deleted_rows > 0 {
-                        HttpResponse::Ok().body(format!("{} excursion deleted", customer_cost_id))
+                        HttpResponse::Ok().body(format!("{} customer cost deleted", customer_cost_id))
                     } else {
                         HttpResponse::NotFound().body("Excursion not found")
                     }
