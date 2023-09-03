@@ -15,6 +15,8 @@ CREATE TABLE excursion (
   excursion_type_id integer NOT NULL,
   name varchar(100) DEFAULT 'Empty',
   description text DEFAULT 'Empty',
+  short_description text DEFAULT 'Empty',
+  route text DEFAULT 'Empty',
   time varchar(50) NOT NULL,
   available integer NOT NULL,
   PRIMARY KEY (id),

@@ -22,11 +22,12 @@ async fn add_customer_type(
         Ok(mut conn) => {
             match diesel::insert_into(customers_types)
                 .values(crate::schema::customers_types::columns::name.eq(&query.into_inner().name))
-                .execute(&mut conn)
+                .returning(crate::schema::customers_types::columns::id)
+                .get_result::<i32>(&mut conn)
                 .await
             {
-                Ok(inserted_rows) => {
-                    HttpResponse::Ok().body(format!("{} customer type(s) added", inserted_rows))
+                Ok(returned_id) => {
+                    HttpResponse::Ok().body(format!("customer type with id {} added", returned_id))
                 }
                 Err(err) => {
                     warn!("Database error: {}", err);

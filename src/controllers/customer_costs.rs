@@ -17,11 +17,12 @@ async fn add_customer_cost(
         Ok(mut conn) => {
             match diesel::insert_into(customers_type_costs)
                 .values(&json.into_inner())
-                .execute(&mut conn)
+                .returning(id)
+                .get_result::<i32>(&mut conn)
                 .await
             {
-                Ok(inserted_rows) => {
-                    HttpResponse::Ok().body(format!("{} customer cost(s) added", inserted_rows))
+                Ok(returned_id) => {
+                    HttpResponse::Ok().body(format!("customer cost with id {} added", returned_id))
                 }
                 Err(err) => {
                     warn!("Database error: {}", err);

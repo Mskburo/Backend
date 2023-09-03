@@ -1,4 +1,4 @@
-use diesel::prelude::*;
+pub(crate) use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::schema::{excursion,excursion_type};
@@ -14,6 +14,8 @@ pub struct Excursion {
     pub excursion_type_id: i32,
     pub name: Option<String>,
     pub description: Option<String>,
+    pub short_description: Option<String>,
+    pub route: Option<String>,
     pub time: String,
     pub available: i32,
 }

@@ -24,6 +24,8 @@ diesel::table! {
         #[max_length = 100]
         name -> Nullable<Varchar>,
         description -> Nullable<Text>,
+        short_description -> Nullable<Text>,
+        route -> Nullable<Text>,
         #[max_length = 50]
         time -> Varchar,
         available -> Int4,

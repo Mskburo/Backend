@@ -18,11 +18,12 @@ async fn add_excursion(app_state: web::Data<AppState>, json: web::Json<Excursion
         Ok(mut conn) => {
             match diesel::insert_into(excursion)
                 .values(&json.into_inner())
-                .execute(&mut conn)
+                .returning(id)
+                .get_result::<i32>(&mut conn)
                 .await
             {
-                Ok(inserted_rows) => {
-                    HttpResponse::Ok().body(format!("{} excursion(s) added", inserted_rows))
+                Ok(returned_id) => {
+                    HttpResponse::Ok().body(format!("excursion with id {} added", returned_id))
                 }
                 Err(err) => {
                     warn!("Database error: {}", err);
