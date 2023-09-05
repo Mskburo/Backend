@@ -1,1 +1,1 @@
-docker compose -f ./docker-compose.yaml up --build -d
+docker compose -f ./rel.docker-compose.yaml --env-file .env.rel up --build -d
