@@ -15,6 +15,8 @@ CREATE TABLE excursion (
   excursion_type_id integer NOT NULL,
   name varchar(100) DEFAULT 'Empty',
   description text DEFAULT 'Empty',
+  short_description text DEFAULT 'Empty',
+  route text DEFAULT 'Empty',
   time varchar(50) NOT NULL,
   available integer NOT NULL,
   PRIMARY KEY (id),
@@ -22,7 +24,7 @@ CREATE TABLE excursion (
 );
 
 CREATE TABLE customers_type_costs (
-  id integer NOT NULL,
+  id serial NOT NULL,
   customers_types_id integer NOT NULL,
   cost float NOT NULL,
   excursion_id integer NOT NULL,

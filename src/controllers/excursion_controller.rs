@@ -1,4 +1,4 @@
-use actix_web::{delete, get, post, web, HttpResponse};
+use actix_web::{delete, get, post, put, web, HttpResponse};
 
 use crate::schema::excursion::dsl::*;
 use diesel::{ExpressionMethods, QueryDsl, SelectableHelper};
@@ -12,17 +12,18 @@ type _DbConnection = Object<
 >;
 
 //CREATE
-#[post("/excursions")]
+#[put("")]
 async fn add_excursion(app_state: web::Data<AppState>, json: web::Json<Excursion>) -> HttpResponse {
     match app_state.db.get().await {
         Ok(mut conn) => {
             match diesel::insert_into(excursion)
                 .values(&json.into_inner())
-                .execute(&mut conn)
+                .returning(id)
+                .get_result::<i32>(&mut conn)
                 .await
             {
-                Ok(inserted_rows) => {
-                    HttpResponse::Ok().body(format!("{} excursion(s) added", inserted_rows))
+                Ok(returned_id) => {
+                    HttpResponse::Ok().body(format!("excursion with id {} added", returned_id))
                 }
                 Err(err) => {
                     warn!("Database error: {}", err);
@@ -40,7 +41,7 @@ async fn add_excursion(app_state: web::Data<AppState>, json: web::Json<Excursion
 }
 
 //READ
-#[get("/excursions")]
+#[get("/")]
 async fn get_all_excursions(app_state: web::Data<AppState>) -> HttpResponse {
     match app_state.db.get().await {
         Ok(mut conn) => match excursion.load::<Excursion>(&mut conn).await {
@@ -57,7 +58,7 @@ async fn get_all_excursions(app_state: web::Data<AppState>) -> HttpResponse {
     }
 }
 
-#[get("/excursions/{excursion_id}")]
+#[get("/{excursion_id}")]
 async fn get_excursion_by_id(
     app_state: web::Data<AppState>,
     excursion_id: web::Path<i32>,
@@ -87,7 +88,7 @@ async fn get_excursion_by_id(
 }
 
 //Update
-#[post("/excursions/{excursion_id}")]
+#[post("/{excursion_id}")]
 async fn update_excursion_by_id(
     app_state: web::Data<AppState>,
     json: web::Json<Excursion>,
@@ -123,7 +124,7 @@ async fn update_excursion_by_id(
 }
 
 //DELETE
-#[delete("/excursions/{excursion_id}")]
+#[delete("/{excursion_id}")]
 async fn delete_excursion_by_id(
     app_state: web::Data<AppState>,
     excursion_id: web::Path<i32>,
