@@ -1,14 +1,15 @@
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
-use crate::schema::tickets;
+use crate::schema::orders_to_tickets;
 
 #[derive(Queryable, Selectable, Debug, PartialEq, Deserialize, Serialize)]
-#[diesel(belongs_to(Excursion))]
-#[diesel(table_name = tickets)]
+#[diesel(belongs_to(Order))]
+#[diesel(table_name = orders_to_tickets)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
-pub struct Tickets{
+pub struct OrdersToTickets{
     #[diesel(deserialize_as = i32)]
     pub id: Option<i32>,
-    pub amount: Option<i32>,
-    pub customers_type_costs_id: i32,
+    pub amount: i32,
+    pub order_id: i32,
+    pub customer_type_id: i32,
 }

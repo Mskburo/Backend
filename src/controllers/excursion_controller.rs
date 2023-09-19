@@ -1,6 +1,6 @@
 use actix_web::{delete, get, post, put, web, HttpResponse};
 
-use crate::schema::excursion::dsl::*;
+use crate::schema::excursions::dsl::*;
 use diesel::{ExpressionMethods, QueryDsl, SelectableHelper};
 use diesel_async::{pooled_connection::deadpool::Object, RunQueryDsl};
 use tracing::{error, warn};
@@ -16,7 +16,7 @@ type _DbConnection = Object<
 async fn add_excursion(app_state: web::Data<AppState>, json: web::Json<Excursion>) -> HttpResponse {
     match app_state.db.get().await {
         Ok(mut conn) => {
-            match diesel::insert_into(excursion)
+            match diesel::insert_into(excursions)
                 .values(&json.into_inner())
                 .returning(id)
                 .get_result::<i32>(&mut conn)
@@ -41,11 +41,11 @@ async fn add_excursion(app_state: web::Data<AppState>, json: web::Json<Excursion
 }
 
 //READ
-#[get("/")]
+#[get("")]
 async fn get_all_excursions(app_state: web::Data<AppState>) -> HttpResponse {
     match app_state.db.get().await {
-        Ok(mut conn) => match excursion.load::<Excursion>(&mut conn).await {
-            Ok(excursions) => HttpResponse::Ok().json(excursions),
+        Ok(mut conn) => match excursions.load::<Excursion>(&mut conn).await {
+            Ok(_excursions) => HttpResponse::Ok().json(_excursions),
             Err(err) => {
                 warn!("Database error: {}", err);
                 HttpResponse::InternalServerError().body(format!("Database error: {}", err))
@@ -67,7 +67,7 @@ async fn get_excursion_by_id(
 
     match app_state.db.get().await {
         Ok(mut conn) => {
-            match excursion
+            match excursions
                 .find(excursion_id)
                 .select(Excursion::as_select())
                 .first(&mut conn)
@@ -98,7 +98,7 @@ async fn update_excursion_by_id(
 
     match app_state.db.get().await {
         Ok(mut conn) => {
-            match diesel::update(excursion.filter(id.eq(excursion_id)))
+            match diesel::update(excursions.filter(id.eq(excursion_id)))
                 .set(json.into_inner())
                 .execute(&mut conn)
                 .await
@@ -133,7 +133,7 @@ async fn delete_excursion_by_id(
 
     match app_state.db.get().await {
         Ok(mut conn) => {
-            match diesel::delete(excursion.filter(id.eq(excursion_id)))
+            match diesel::delete(excursions.filter(id.eq(excursion_id)))
                 .execute(&mut conn)
                 .await
             {
