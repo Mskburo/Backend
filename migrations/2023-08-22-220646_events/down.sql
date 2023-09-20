@@ -2,6 +2,6 @@
 DROP TABLE excursions CASCADE;
 DROP TABLE customers_types CASCADE;
 DROP TABLE excursions_types;
-DROP TABLE orders CASCADE;
+DROP TABLE carts CASCADE;
 DROP TABLE customers_type_costs CASCADE;
-DROP TABLE orders_to_tickets;
+DROP TABLE cart_to_costs_types;

@@ -20,6 +20,7 @@ use controllers::{
         add_excursion, delete_excursion_by_id, get_all_excursions, get_excursion_by_id,
         update_excursion_by_id,
     },
+    carts_controller::{add_cart, get_all_carts, update_cart_by_id, delete_cart_by_id, get_cart_by_id},
 };
 use diesel_async::{
     pooled_connection::{deadpool::Pool, AsyncDieselConnectionManager},
@@ -78,20 +79,29 @@ async fn main() -> std::io::Result<()> {
                 ))
                 //ADMIN
                 .service(
-                    web::scope("/admin/excursions")
-                        .service(add_excursion)
-                        .service(delete_excursion_by_id)
-                        .service(update_excursion_by_id)
+                    web::scope("/admin")
+                        .service(web::scope("/carts")
+                        .service(get_all_carts)
+                        .service(get_cart_by_id)
+                        .service(update_cart_by_id)
+                        .service(delete_cart_by_id)
+                    )
                         .service(
-                            web::scope("/costs")
-                                .service(add_customer_cost)
-                                .service(delete_customer_cost_by_id)
-                                .service(update_customer_cost_by_id)
+                            web::scope("/excursions")
+                                .service(add_excursion)
+                                .service(delete_excursion_by_id)
+                                .service(update_excursion_by_id)
                                 .service(
-                                    web::scope("/types")
-                                        .service(add_customer_type)
-                                        .service(delete_customer_type_by_id)
-                                        .service(update_customer_type_by_id),
+                                    web::scope("/costs")
+                                        .service(add_customer_cost)
+                                        .service(delete_customer_cost_by_id)
+                                        .service(update_customer_cost_by_id)
+                                        .service(
+                                            web::scope("/types")
+                                                .service(add_customer_type)
+                                                .service(delete_customer_type_by_id)
+                                                .service(update_customer_type_by_id),
+                                        ),
                                 ),
                         ),
                 )
@@ -109,7 +119,8 @@ async fn main() -> std::io::Result<()> {
                                         .service(get_customer_type_by_id),
                                 ),
                         ),
-                ), 
+                )
+                .service(web::scope("/carts").service(add_cart)),
         )
     })
     .bind(("0.0.0.0", 8090))?
