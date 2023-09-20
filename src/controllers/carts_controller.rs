@@ -30,53 +30,50 @@ struct InsertCart {
 //CREATE
 #[put("")]
 async fn add_cart(app_state: web::Data<AppState>, json: web::Json<InsertCart>) -> HttpResponse {
-    let insert_cart = json.into_inner();
-    match app_state.db.get().await {
-        Ok(mut conn) => {
-            match diesel::insert_into(carts)
-                .values(insert_cart.cart_info)
-                .returning(schema::carts::columns::id)
-                .get_result::<i32>(&mut conn)
-                .await
-            {
-                Ok(returned_id) => {
-                    let cart_to_costs: Vec<CartToCostsTypes> = insert_cart
-                        .tickets
-                        .iter()
-                        .map(|insert_cost| CartToCostsTypes {
-                            id: None, // You can set this value as needed.
-                            amount: insert_cost.amount,
-                            cart_id: returned_id, // Set the cart_id to the desired value.
-                            customer_type_cost_id: insert_cost.cost_id,
-                        })
-                        .collect();
-
-                    match diesel::insert_into(cart_to_costs_types)
-                        .values(cart_to_costs)
-                        .returning(schema::cart_to_costs_types::columns::id)
-                        .get_result::<i32>(&mut conn)
-                        .await
-                    {
-                        Ok(_) => {
-                            HttpResponse::Ok().body(format!("cart with id {} added", returned_id))
-                        }
-                        Err(err) => {
-                            warn!("Database error: {}", err);
-                            let error_message = format!("Database error: {}", err);
-                            HttpResponse::InternalServerError().body(error_message)
-                        }
-                    }
-                }
-                Err(err) => {
-                    warn!("Database error: {}", err);
-                    let error_message = format!("Database error: {}", err);
-                    HttpResponse::InternalServerError().body(error_message)
-                }
-            }
-        }
+    let input_cart = json.into_inner();
+    let mut conn = match app_state.db.get().await {
+        Ok(conn) => conn,
         Err(err) => {
             error!("Database connection error: {}", err);
             let error_message = format!("Database connection error: {}", err);
+            return HttpResponse::InternalServerError().body(error_message);
+        }
+    };
+
+    let cart = match diesel::insert_into(carts)
+        .values(input_cart.cart_info)
+        .returning(schema::carts::columns::id)
+        .get_result::<i32>(&mut conn)
+        .await
+    {
+        Ok(_id) => _id,
+        Err(err) => {
+            warn!("Database error: {}", err);
+            let error_message = format!("Database error: {}", err);
+            return HttpResponse::InternalServerError().body(error_message);
+        }
+    };
+
+    let cart_to_costs: Vec<CartToCostsTypes> = input_cart.tickets
+        .iter()
+        .map(|insert_cost| CartToCostsTypes {
+            id: None, // You can set this value as needed.
+            amount: insert_cost.amount,
+            cart_id: cart, // Set the cart_id to the desired value.
+            customer_type_cost_id: insert_cost.cost_id,
+        })
+        .collect();
+
+    match diesel::insert_into(cart_to_costs_types)
+        .values(cart_to_costs)
+        .returning(schema::cart_to_costs_types::columns::id)
+        .get_result::<i32>(&mut conn)
+        .await
+    {
+        Ok(_) => HttpResponse::Ok().body(format!("cart with id {} added", cart)),
+        Err(err) => {
+            warn!("Database error: {}", err);
+            let error_message = format!("Database error: {}", err);
             HttpResponse::InternalServerError().body(error_message)
         }
     }
