@@ -20,8 +20,6 @@ diesel::table! {
         #[max_length = 20]
         tel -> Varchar,
         email -> Text,
-        #[max_length = 15]
-        payment_type -> Varchar,
         bill -> Text,
         created_at -> Nullable<Timestamptz>,
         is_paid -> Nullable<Bool>,

@@ -16,7 +16,6 @@ pub struct Cart {
     pub name: String,
     pub tel: String,
     pub email: String,
-    pub payment_type: String,
     pub bill: String,
     pub created_at: Option<chrono::NaiveDateTime>,
     pub is_paid: Option<bool>,

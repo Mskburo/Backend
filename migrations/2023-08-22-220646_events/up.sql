@@ -43,7 +43,6 @@ CREATE TABLE carts (
   name text NOT NULL,
   tel varchar(20) NOT NULL,
   email text NOT NULL,
-  payment_type varchar(15) NOT NULL,
   bill text NOT NULL,
   created_at timestamptz NULL DEFAULT now(),
   is_paid boolean NULL DEFAULT false,
@@ -61,6 +60,22 @@ CREATE TABLE cart_to_costs_types (
   CONSTRAINT orders_to_tickets_ticket_id_customers_type_costs_id_foreign FOREIGN KEY (customer_type_cost_id) REFERENCES customers_type_costs (id)
 );
 
+CREATE OR REPLACE VIEW excursion_details AS
+SELECT e.id AS id,
+  et.name AS type,
+  e.name AS name,
+  e.description AS description,
+  e.short_description AS short_description,
+  e.time AS time,
+  e.available AS available,
+  e.photo AS photo,
+  e.route AS route,
+  e.short_route AS short_route,
+  e.meeting_info AS meeting_info,
+  e.is_active AS is_active
+FROM excursions e
+  JOIN excursions_types et ON e.excursion_type_id = et.id;
+
 INSERT INTO "excursions_types" ("name")
 VALUES ('Наземная');
 
@@ -72,3 +87,4 @@ VALUES ('Стандартный тариф');
 
 INSERT INTO "customers_type_costs" ( "excursion_id", "customers_types_id", "cost")
 VALUES ( '1', '1', '1111');
+

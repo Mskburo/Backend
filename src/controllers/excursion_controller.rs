@@ -1,6 +1,13 @@
 use actix_web::{delete, get, post, put, web, HttpResponse};
+use serde::{Deserialize, Serialize};
 
-use crate::schema::excursions::dsl::*;
+use crate::{
+    models::{
+        costs::CustomersTypeCosts,
+        excursion::{ExcursionDetails, ExcursionType},
+    },
+    schema::excursions::dsl::*,
+};
 use diesel::{ExpressionMethods, QueryDsl, SelectableHelper};
 use diesel_async::{pooled_connection::deadpool::Object, RunQueryDsl};
 use tracing::{error, warn};
@@ -10,6 +17,13 @@ use crate::{models::excursion::Excursion, AppState};
 type _DbConnection = Object<
     diesel_async::pooled_connection::AsyncDieselConnectionManager<diesel_async::AsyncPgConnection>,
 >;
+
+#[derive(Deserialize, Serialize)]
+struct ExcursionJoin {
+    pub excursion_info: Excursion,
+    // pub excursion_type: ExcursionType,
+    pub tikets: Vec<CustomersTypeCosts>,
+}
 
 //CREATE
 #[put("")]
@@ -41,21 +55,52 @@ async fn add_excursion(app_state: web::Data<AppState>, json: web::Json<Excursion
 }
 
 //READ
+
 #[get("")]
 async fn get_all_excursions(app_state: web::Data<AppState>) -> HttpResponse {
-    match app_state.db.get().await {
-        Ok(mut conn) => match excursions.load::<Excursion>(&mut conn).await {
-            Ok(_excursions) => HttpResponse::Ok().json(_excursions),
-            Err(err) => {
-                warn!("Database error: {}", err);
-                HttpResponse::InternalServerError().body(format!("Database error: {}", err))
-            }
-        },
+    let mut result: Vec<ExcursionJoin> = vec![];
+
+    let mut conn = match app_state.db.get().await {
+        Ok(conn) => conn,
         Err(err) => {
             error!("Database connection error: {}", err);
-            HttpResponse::InternalServerError().body(format!("Database connection error: {}", err))
+            let error_message = format!("Database connection error: {}", err);
+            return HttpResponse::InternalServerError().body(error_message);
         }
-    }
+    };
+
+    match excursions.load::<Excursion>(&mut conn).await {
+        Ok(_excursions) => {
+            for ex in _excursions {
+                let tikets = match crate::schema::customers_type_costs::table
+                    .filter(
+                        crate::schema::customers_type_costs::columns::excursion_id
+                            .eq(ex.id.unwrap_or(1)),
+                    )
+                    .select(CustomersTypeCosts::as_select())
+                    .load(&mut conn)
+                    .await
+                {
+                    Ok(result) => result,
+                    Err(err) => {
+                        warn!("Database error: {}", err);
+                        return HttpResponse::InternalServerError()
+                            .body(format!("Database error: {}", err));
+                    }
+                };
+
+                result.push(ExcursionJoin {
+                    excursion_info: ex,
+                    tikets,
+                });
+            }
+            return HttpResponse::Ok().json(result);
+        }
+        Err(err) => {
+            warn!("Database error: {}", err);
+            return HttpResponse::InternalServerError().body(format!("Database error: {}", err));
+        }
+    };
 }
 
 #[get("/{excursion_id}")]
