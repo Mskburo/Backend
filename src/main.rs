@@ -1,13 +1,16 @@
 pub mod controllers;
 pub mod models;
-pub mod schema;
+pub mod repo;
+pub mod validators;
 
 use actix_cors::Cors;
 use actix_web::{
     web::{self},
     App, HttpServer,
 };
+use actix_web_httpauth::middleware::HttpAuthentication;
 use controllers::{
+    carts_controller::{add_cart, get_all_carts, get_cart_by_id},
     customer_costs::{
         add_customer_cost, delete_customer_cost_by_id, get_customer_cost_by_excursion_id,
         update_customer_cost_by_id,
@@ -17,22 +20,19 @@ use controllers::{
         get_customer_type_by_id, update_customer_type_by_id,
     },
     excursion_controller::{
-        add_excursion, delete_excursion_by_id, get_all_excursions, get_excursion_by_id,
-        update_excursion_by_id,
+        add_excursion, delete_excursion_by_id, get_all_count_of_remaining_tickets,
+        get_all_excursions, get_excursion_by_id, update_excursion_by_id,
     },
-    carts_controller::{add_cart, get_all_carts, update_cart_by_id, delete_cart_by_id, get_cart_by_id},
 };
-use diesel_async::{
-    pooled_connection::{deadpool::Pool, AsyncDieselConnectionManager},
-    AsyncPgConnection,
-};
+
 use dotenv::dotenv;
+use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 use tracing::Level;
 use tracing_subscriber::FmtSubscriber;
 
 #[derive(Clone)]
 pub struct AppState {
-    db: deadpool::managed::Pool<AsyncDieselConnectionManager<AsyncPgConnection>>,
+    db: Pool<Postgres>,
     http_client: HttpPaymentClient,
 }
 
@@ -53,17 +53,18 @@ async fn main() -> std::io::Result<()> {
 
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
-    let config = AsyncDieselConnectionManager::<diesel_async::AsyncPgConnection>::new(database_url);
-    let pool = Pool::builder(config)
-        .max_size(10)
-        .build()
-        .expect("error building pool");
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&database_url)
+        .await
+        .expect("Error building a connection pool");
 
     let store_id = std::env::var("YOOCASSA_STORE_ID").expect("YOOCASSA_STORE_ID must be set");
     let store_key = std::env::var("YOOCASSA_KEY").expect("YOOCASSA_KEY must be set");
 
     HttpServer::new(move || {
         let cors = Cors::permissive();
+        let auth = HttpAuthentication::bearer(validators::validator);
         App::new().wrap(cors).service(
             web::scope("api/v1")
                 .app_data(web::Data::new(
@@ -78,14 +79,14 @@ async fn main() -> std::io::Result<()> {
                     .clone(),
                 ))
                 //ADMIN
+                .wrap(auth)
                 .service(
                     web::scope("/admin")
-                        .service(web::scope("/carts")
-                        .service(get_all_carts)
-                        .service(get_cart_by_id)
-                        .service(update_cart_by_id)
-                        .service(delete_cart_by_id)
-                    )
+                        .service(
+                            web::scope("/carts")
+                                .service(get_all_carts)
+                                .service(get_cart_by_id),
+                        )
                         .service(
                             web::scope("/excursions")
                                 .service(add_excursion)
@@ -110,6 +111,7 @@ async fn main() -> std::io::Result<()> {
                     web::scope("/excursions")
                         .service(get_all_excursions)
                         .service(get_excursion_by_id)
+                        .service(get_all_count_of_remaining_tickets)
                         .service(
                             web::scope("/costs")
                                 .service(get_customer_cost_by_excursion_id)

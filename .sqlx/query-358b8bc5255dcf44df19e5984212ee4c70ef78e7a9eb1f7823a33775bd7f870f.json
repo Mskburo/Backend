@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM cart_to_costs_types WHERE id = $1;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "358b8bc5255dcf44df19e5984212ee4c70ef78e7a9eb1f7823a33775bd7f870f"
+}

@@ -1,0 +1,42 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO customers_type_costs (excursion_id, customers_types_id, cost)\n            VALUES ($1, $2, $3)\n            RETURNING *;",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "excursion_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "customers_types_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "cost",
+        "type_info": "Float8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Float8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "02d55149982d80c27f300ce7c18fe75e1074ec9b9d9a9f4844e0bbebdcc838f5"
+}

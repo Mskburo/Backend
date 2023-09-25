@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE cart_to_costs_types\n            SET cart_id = $1, customer_type_cost_id = $2, amount = $3\n            WHERE id = $4;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b8e6b0467bd67d502488e2700c1b611cf902b5af4502f8418210cb0f8f76f510"
+}

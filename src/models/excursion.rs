@@ -1,25 +1,9 @@
-pub(crate) use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 
-use crate::schema::{excursions, excursions_types};
-
-#[derive(
-    Queryable,
-    AsChangeset,
-    Insertable,
-    Selectable,
-    Identifiable,
-    Associations,
-    Debug,
-    PartialEq,
-    Deserialize,
-    Serialize,
-)]
-#[diesel(belongs_to(ExcursionType))]
-#[diesel(table_name = excursions)]
-#[diesel(primary_key(id))]
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct Excursion {
-    #[diesel(deserialize_as = i32)]
+    #[serde(skip_deserializing)]
     pub id: Option<i32>,
     pub excursion_type_id: i32,
     pub name: Option<String>,
@@ -32,37 +16,21 @@ pub struct Excursion {
     pub short_route: Option<String>,
     pub meeting_info: Option<String>,
     pub is_active: Option<bool>,
+    pub times: Vec<String>,
 }
 
-#[derive(Queryable, Selectable, Debug, PartialEq, Deserialize, Serialize)]
-#[diesel(table_name = excursions_types)]
-#[diesel(primary_key(id))]
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct ExcursionType {
-    #[diesel(deserialize_as = i32)]
+    #[serde(skip_deserializing)]
     pub id: Option<i32>,
     pub name: String,
 }
 
-
-#[derive(
-    Queryable,
-    AsChangeset,
-    Insertable,
-    Selectable,
-    Identifiable,
-    Associations,
-    Debug,
-    PartialEq,
-    Deserialize,
-    Serialize,
-)]
-#[diesel(belongs_to(ExcursionType))]
-#[diesel(table_name = excursions)]
-#[diesel(primary_key(id))]
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct ExcursionDetails {
-    #[diesel(deserialize_as = i32)]
+    #[serde(skip_deserializing)]
     pub id: Option<i32>,
-    pub excursion_type_id: i32,
+    pub type_name: Option<String>,
     pub name: Option<String>,
     pub description: Option<String>,
     pub short_description: Option<String>,
@@ -73,4 +41,18 @@ pub struct ExcursionDetails {
     pub short_route: Option<String>,
     pub meeting_info: Option<String>,
     pub is_active: Option<bool>,
+    pub times: Vec<String>,
+}
+
+#[derive(Deserialize, Serialize)]
+struct ExcursionJoin {
+    pub excursion_info: Excursion,
+    pub tikets: Vec<super::costs::CustomersTypeCosts>,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct ExcursionQuery {
+    pub excursion_id: i32,
+    pub time: String,
+    pub date: chrono::naive::NaiveDate,
 }

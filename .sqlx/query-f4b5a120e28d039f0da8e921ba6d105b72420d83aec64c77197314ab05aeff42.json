@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT * FROM cart_to_costs_types WHERE id = $1;",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "cart_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "customer_type_cost_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "amount",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "f4b5a120e28d039f0da8e921ba6d105b72420d83aec64c77197314ab05aeff42"
+}
