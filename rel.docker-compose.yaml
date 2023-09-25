@@ -9,6 +9,7 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - YOOCASSA_STORE_ID=${YOOCASSA_STORE_ID} 
       - YOOCASSA_KEY=${YOOCASSA_KEY}
+      - TOKEN=${TOKEN}
     ports:
       - '8090:8090'
 
