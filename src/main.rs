@@ -79,9 +79,9 @@ async fn main() -> std::io::Result<()> {
                     .clone(),
                 ))
                 //ADMIN
-                .wrap(auth)
                 .service(
                     web::scope("/admin")
+                    .wrap(auth)
                         .service(
                             web::scope("/carts")
                                 .service(get_all_carts)
