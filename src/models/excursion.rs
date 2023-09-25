@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
+use super::costs::{CustomersTypeCosts, CustomersTypeCostsReturn};
+
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct Excursion {
     #[serde(skip_deserializing)]
@@ -25,6 +27,13 @@ pub struct ExcursionType {
     pub id: Option<i32>,
     pub name: String,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+pub struct ExcursionWithCosts {
+    pub excursion: ExcursionDetails,
+    pub tickets: Vec<CustomersTypeCostsReturn>,
+}
+
 
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct ExcursionDetails {

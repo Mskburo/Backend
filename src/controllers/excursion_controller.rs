@@ -1,6 +1,6 @@
 use actix_web::{delete, get, post, put, web, HttpResponse};
 
-use crate::models::excursion::{Excursion, ExcursionQuery};
+use crate::models::{excursion::{Excursion, ExcursionQuery, ExcursionWithCosts}, costs::CustomersTypeCosts};
 use tracing::error;
 
 use crate::AppState;
@@ -20,13 +20,25 @@ async fn add_excursion(app_state: web::Data<AppState>, json: web::Json<Excursion
 //READ
 #[get("")]
 async fn get_all_excursions(app_state: web::Data<AppState>) -> HttpResponse {
-    match Excursion::get_all(&app_state.db).await {
-        Ok(result) => HttpResponse::Accepted().json(result),
+    let excursions = match Excursion::get_all(&app_state.db).await {
+        Ok(result) =>result,
         Err(e) => {
             error!("{}", e);
             return HttpResponse::BadRequest().body(format!("{}", e));
         }
-    }
+    };
+    let mut result :Vec<ExcursionWithCosts>= vec![];
+    for excursion in excursions {
+        match CustomersTypeCosts::get_by_excursion_id(excursion.id.unwrap(),&app_state.db).await {
+        Ok(_result) =>result.push(ExcursionWithCosts{excursion,tickets: _result}),
+        Err(e) => {
+            error!("{}", e);
+            return HttpResponse::BadRequest().body(format!("{}", e));
+        }
+    };
+    };
+    return HttpResponse::Accepted().json(result);
+     
 }
 #[get("/")]
 async fn get_all_count_of_remaining_tickets(

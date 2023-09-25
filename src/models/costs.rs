@@ -16,3 +16,12 @@ pub struct CustomersTypeCosts {
     pub cost: f64,
     pub excursion_id: i32,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+pub struct CustomersTypeCostsReturn {
+    #[serde(skip_deserializing)]
+    pub id: Option<i32>,
+    pub customers_type_name: String,
+    pub cost: f64,
+    pub excursion_id: i32,
+}
