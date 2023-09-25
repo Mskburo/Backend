@@ -1,35 +1,16 @@
-use crate::models::excursion::Excursion;
-use crate::schema::{customers_type_costs, customers_types};
-use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 
-#[derive(Queryable, AsChangeset, Selectable, Debug, PartialEq, Deserialize, Serialize)]
-#[diesel(table_name = customers_types)]
-#[diesel(check_for_backend(diesel::pg::Pg))]
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct CustomersTypes {
-    #[diesel(deserialize_as = i32)]
+    #[serde(skip_deserializing)]
     pub id: Option<i32>,
     pub name: String,
 }
 
-#[derive(
-    Queryable,
-    AsChangeset,
-    Insertable,
-    Selectable,
-    Identifiable,
-    Associations,
-    Debug,
-    PartialEq,
-    Deserialize,
-    Serialize,
-)]
-#[diesel(belongs_to(CustomersTypes))]
-#[diesel(belongs_to(Excursion))]
-#[diesel(table_name = customers_type_costs)]
-#[diesel(check_for_backend(diesel::pg::Pg))]
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct CustomersTypeCosts {
-    #[diesel(deserialize_as = i32)]
+    #[serde(skip_deserializing)]
     pub id: Option<i32>,
     pub customers_types_id: i32,
     pub cost: f64,

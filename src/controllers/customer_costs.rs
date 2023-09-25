@@ -1,8 +1,6 @@
 use crate::models::costs::CustomersTypeCosts;
-use crate::schema::customers_type_costs::dsl::*;
 use actix_web::{delete, get, post, put, web, HttpResponse};
-use diesel::{ExpressionMethods, QueryDsl, SelectableHelper};
-use diesel_async::RunQueryDsl;
+
 use tracing::{error, warn};
 
 use crate::AppState;
@@ -13,28 +11,11 @@ async fn add_customer_cost(
     app_state: web::Data<AppState>,
     json: web::Json<CustomersTypeCosts>,
 ) -> HttpResponse {
-    match app_state.db.get().await {
-        Ok(mut conn) => {
-            match diesel::insert_into(customers_type_costs)
-                .values(&json.into_inner())
-                .returning(id)
-                .get_result::<i32>(&mut conn)
-                .await
-            {
-                Ok(returned_id) => {
-                    HttpResponse::Ok().body(format!("customer cost with id {} added", returned_id))
-                }
-                Err(err) => {
-                    warn!("Database error: {}", err);
-                    let error_message = format!("Database error: {}", err);
-                    HttpResponse::InternalServerError().body(error_message)
-                }
-            }
-        }
-        Err(err) => {
-            error!("Database connection error: {}", err);
-            let error_message = format!("Database connection error: {}", err);
-            HttpResponse::InternalServerError().body(error_message)
+    match json.into_inner().insert(&app_state.db).await {
+        Ok(result) => HttpResponse::Accepted().json(result),
+        Err(e) => {
+            error!("{}", e);
+            return HttpResponse::BadRequest().body(format!("{}", e));
         }
     }
 }
@@ -45,26 +26,12 @@ async fn get_customer_cost_by_excursion_id(
     app_state: web::Data<AppState>,
     path: web::Path<i32>,
 ) -> HttpResponse {
-    let excursion = path.into_inner();
-
-    match app_state.db.get().await {
-        Ok(mut conn) => {
-            match customers_type_costs
-                .filter(crate::schema::customers_type_costs::columns::excursion_id.eq(excursion))
-                .select(CustomersTypeCosts::as_select())
-                .first(&mut conn)
-                .await
-            {
-                Ok(result) => HttpResponse::Ok().json(result),
-                Err(err) => {
-                    warn!("Database error: {}", err);
-                    HttpResponse::InternalServerError().body(format!("Database error: {}", err))
-                }
-            }
-        }
-        Err(err) => {
-            error!("Database connection error: {}", err);
-            HttpResponse::InternalServerError().body(format!("Database connection error: {}", err))
+    let excursion_id = path.into_inner();
+    match CustomersTypeCosts::get_by_excursion_id(excursion_id, &app_state.db).await {
+        Ok(result) => HttpResponse::Accepted().json(result),
+        Err(e) => {
+            error!("{}", e);
+            return HttpResponse::BadRequest().body(format!("{}", e));
         }
     }
 }
@@ -78,30 +45,11 @@ async fn update_customer_cost_by_id(
 ) -> HttpResponse {
     let cost_id = path.into_inner();
     let new_cost = new_cost.into_inner();
-    match app_state.db.get().await {
-        Ok(mut conn) => {
-            match diesel::update(customers_type_costs)
-                .filter(crate::schema::customers_type_costs::columns::id.eq(cost_id))
-                .set(crate::schema::customers_type_costs::columns::cost.eq(new_cost))
-                .execute(&mut conn)
-                .await
-            {
-                Ok(updated_rows) => {
-                    if updated_rows > 0 {
-                        HttpResponse::Ok().body(format!("{} customer cost(s) updated", updated_rows))
-                    } else {
-                        HttpResponse::NotFound().body("Excursion not found")
-                    }
-                }
-                Err(err) => {
-                    warn!("Database error: {}", err);
-                    HttpResponse::InternalServerError().body(format!("Database error: {}", err))
-                }
-            }
-        }
-        Err(err) => {
-            error!("Database connection error: {}", err);
-            HttpResponse::InternalServerError().body(format!("Database connection error: {}", err))
+    match CustomersTypeCosts::update_by_id_value(new_cost, cost_id, &app_state.db).await {
+        Ok(result) => HttpResponse::Accepted().json(result),
+        Err(e) => {
+            error!("{}", e);
+            return HttpResponse::BadRequest().body(format!("{}", e));
         }
     }
 }
@@ -114,31 +62,11 @@ async fn delete_customer_cost_by_id(
 ) -> HttpResponse {
     let customer_cost_id = customer_cost_id.into_inner();
 
-    match app_state.db.get().await {
-        Ok(mut conn) => {
-            match diesel::delete(
-                customers_type_costs
-                    .filter(crate::schema::customers_type_costs::columns::id.eq(customer_cost_id)),
-            )
-            .execute(&mut conn)
-            .await
-            {
-                Ok(deleted_rows) => {
-                    if deleted_rows > 0 {
-                        HttpResponse::Ok().body(format!("{} customer cost deleted", customer_cost_id))
-                    } else {
-                        HttpResponse::NotFound().body("Excursion not found")
-                    }
-                }
-                Err(err) => {
-                    warn!("Database error: {}", err);
-                    HttpResponse::InternalServerError().body(format!("Database error: {}", err))
-                }
-            }
-        }
-        Err(err) => {
-            error!("Database connection error: {}", err);
-            HttpResponse::InternalServerError().body(format!("Database connection error: {}", err))
+    match CustomersTypeCosts::delete_by_id(customer_cost_id, &app_state.db).await {
+        Ok(result) => HttpResponse::Accepted().json(result),
+        Err(e) => {
+            error!("{}", e);
+            return HttpResponse::BadRequest().body(format!("{}", e));
         }
     }
 }

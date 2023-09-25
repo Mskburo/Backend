@@ -1,4 +1,4 @@
--- This file should undo anything in `up.sql`
+-- Add down migration script here
 DROP TABLE excursions CASCADE;
 DROP TABLE customers_types CASCADE;
 DROP TABLE excursions_types;
