@@ -126,15 +126,21 @@ impl Excursion {
         connection: &sqlx::Pool<sqlx::Postgres>,
     ) -> Result<i64, sqlx::Error> {
         let count = sqlx::query_as::<_, QueryHelper>(
-            "SELECT (e.available - COUNT(*)) AS remaining_tickets
+            "
+            SELECT e.available - COALESCE(subquery.ticket_count, 0) AS remaining_tickets
+            FROM excursions e
+            LEFT JOIN (
+                SELECT e.id AS excursion_id, COUNT(*) AS ticket_count
                 FROM excursions e
                 LEFT JOIN customers_type_costs ctc ON e.id = ctc.excursion_id
                 LEFT JOIN cart_to_costs_types ctct ON ctc.id = ctct.customer_type_cost_id
                 LEFT JOIN carts c ON ctct.cart_id = c.id
-                WHERE e.id = $1
+                WHERE e.id =   $1
                   AND c.time = $2
                   AND c.date = $3
-                GROUP BY e.id, e.available;
+                GROUP BY e.id
+            ) AS subquery ON e.id = subquery.excursion_id
+            WHERE e.id = $1;
         ",
             
         )
