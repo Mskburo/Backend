@@ -42,7 +42,7 @@ impl CustomersTypeCosts {
             "SELECT ctc.id, ctc.excursion_id, ct.name AS customers_type_name, ctc.cost
                 FROM customers_type_costs ctc
                 JOIN customers_types ct ON ctc.customers_types_id = ct.id
-                WHERE ctc.id = $1;",
+                WHERE ctc.excursion_id = $1;",
         )
         .bind(id)
         .fetch_all(connection)
