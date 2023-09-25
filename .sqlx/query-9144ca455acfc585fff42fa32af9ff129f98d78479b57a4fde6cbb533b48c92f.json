@@ -1,0 +1,42 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO cart_to_costs_types (cart_id, customer_type_cost_id, amount)\n            VALUES ($1, $2, $3)\n            RETURNING *;",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "cart_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "customer_type_cost_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "amount",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "9144ca455acfc585fff42fa32af9ff129f98d78479b57a4fde6cbb533b48c92f"
+}

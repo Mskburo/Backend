@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
@@ -16,7 +16,7 @@ pub struct Excursion {
     pub short_route: Option<String>,
     pub meeting_info: Option<String>,
     pub is_active: Option<bool>,
-    pub times: Vec<String>
+    pub times: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
@@ -25,7 +25,6 @@ pub struct ExcursionType {
     pub id: Option<i32>,
     pub name: String,
 }
-
 
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct ExcursionDetails {
@@ -42,11 +41,18 @@ pub struct ExcursionDetails {
     pub short_route: Option<String>,
     pub meeting_info: Option<String>,
     pub is_active: Option<bool>,
-    pub times: Vec<String>
+    pub times: Vec<String>,
 }
 
 #[derive(Deserialize, Serialize)]
 struct ExcursionJoin {
     pub excursion_info: Excursion,
     pub tikets: Vec<super::costs::CustomersTypeCosts>,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct ExcursionQuery {
+    pub excursion_id: i32,
+    pub time: String,
+    pub date: chrono::naive::NaiveDate,
 }

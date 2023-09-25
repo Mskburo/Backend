@@ -1,4 +1,12 @@
-use crate::models::excursion::{Excursion, ExcursionDetails};
+use serde::{Serialize, Deserialize};
+use sqlx::FromRow;
+
+use crate::models::excursion::{Excursion, ExcursionDetails, ExcursionQuery};
+
+#[derive(Deserialize, Serialize,FromRow )]
+struct QueryHelper{
+    remaining_tickets:i64
+}
 
 impl Excursion {
     pub async fn insert(
@@ -112,35 +120,31 @@ impl Excursion {
         Ok(rows_affected)
     }
 
-    // pub async fn update_by_value(
-    //     input: Excursion,
-    //     connection: &sqlx::Pool<sqlx::Postgres>,
-    // ) -> Result<bool, sqlx::Error> {
-    //     let rows_affected = sqlx::query(
-    //         "UPDATE excursions  
-    //         SET excursion_type_id=$1, name=$2, description=$3, short_description=$4, time=$5, available=$6, photo=$7, route=$8, short_route=$9, meeting_info=$10, is_active=$11 
-    //         WHERE id = $12
-    //     ",
+   
+    pub async fn get_remaining(
+        query: ExcursionQuery,
+        connection: &sqlx::Pool<sqlx::Postgres>,
+    ) -> Result<i64, sqlx::Error> {
+        let count = sqlx::query_as::<_, QueryHelper>(
+            "SELECT (e.available - COUNT(*)) AS remaining_tickets
+                FROM excursions e
+                LEFT JOIN customers_type_costs ctc ON e.id = ctc.excursion_id
+                LEFT JOIN cart_to_costs_types ctct ON ctc.id = ctct.customer_type_cost_id
+                LEFT JOIN carts c ON ctct.cart_id = c.id
+                WHERE e.id = $1
+                  AND c.time = $2
+                  AND c.date = $3
+                GROUP BY e.id, e.available;
+        ",
             
-    //     )
-    //     .bind(input.excursion_type_id,)
-    //     .bind(input.name,)
-    //     .bind(input.description,)
-    //     .bind(input.short_description,)
-    //     .bind(input.time,)
-    //     .bind(input.available,)
-    //     .bind(input.photo,)
-    //     .bind(input.route,)
-    //     .bind(input.short_route,)
-    //     .bind(input.meeting_info,)
-    //     .bind(input.is_active ,)
-    //     .bind(input.id,)
-    //     .execute(connection)
-    //     .await?
-    //     .rows_affected();
-
-    //     Ok(rows_affected > 0)
-    // }
+        )
+        .bind(query.excursion_id,)
+        .bind(query.time,)
+        .bind(query.date,)
+        .fetch_one(connection)
+        .await?;
+        Ok(count.remaining_tickets)
+    }
 
     pub async fn delete(&self,connection: &sqlx::Pool<sqlx::Postgres>) -> Result<(), sqlx::Error> {
         sqlx::query(

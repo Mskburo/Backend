@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE customers_type_costs\n            SET excursion_id = $1, customers_types_id = $2, cost = $3\n            WHERE id = $4;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Float8",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a2f38fb608397c76b94db4d643a0cc456555ccba47558ad7d1629dbcd1fab8a2"
+}
