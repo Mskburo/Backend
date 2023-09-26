@@ -127,13 +127,20 @@ impl Excursion {
     ) -> Result<i64, sqlx::Error> {
         let count = sqlx::query_as::<_, QueryHelper>(
             "
-        SELECT e.available - COALESCE(SUM(ctct.amount), 0) AS remaining_tickets
-        FROM excursions e
-        LEFT JOIN customers_type_costs ctc ON e.id = ctc.excursion_id
-        LEFT JOIN cart_to_costs_types ctct ON ctc.id = ctct.customer_type_cost_id
-        LEFT JOIN carts c ON ctct.cart_id = c.id AND c.time = $2 AND c.date = $3
-        WHERE e.id = $1
-        GROUP BY e.id, e.available;                
+            SELECT
+                e.available - SUM(ctct.amount) AS remaining_tickets
+            FROM
+                excursions e
+            LEFT JOIN
+                cart_to_costs_types ctct ON e.id = ctct.customer_type_cost_id
+            LEFT JOIN
+                carts c ON ctct.cart_id = c.id
+            WHERE
+                c.date = '2023-10-01' AND
+                c.time = '12:00' AND
+                e.id = 1
+            GROUP BY
+                e.available;
         ",
             
         )
