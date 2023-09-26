@@ -58,6 +58,7 @@ CREATE TABLE cart_to_costs_types (
     CONSTRAINT orders_to_tickets_order_id_orders_order_id_foreign FOREIGN KEY (cart_id) REFERENCES carts (id),
     CONSTRAINT orders_to_tickets_ticket_id_customers_type_costs_id_foreign FOREIGN KEY (customer_type_cost_id) REFERENCES customers_type_costs (id)
 );
+
 CREATE OR REPLACE VIEW excursion_details AS
 SELECT e.id AS id,
     et.name AS type_name,
@@ -76,9 +77,18 @@ FROM excursions e
     JOIN excursions_types et ON e.excursion_type_id = et.id;
 
 
-INSERT INTO "excursions_types" ("name")
-VALUES ('Наземная');
+INSERT INTO "excursions_types" ("id", "name")
+VALUES (1, 'Автобусные'),
+    (2, 'Автобусно-речные');
+
+
+
+INSERT INTO "customers_types" ("id", "name")
+VALUES (1, 'Дети'),
+    (2, 'Деды');
+
 INSERT INTO "excursions" (
+        "id",
         "excursion_type_id",
         "name",
         "description",
@@ -93,21 +103,43 @@ INSERT INTO "excursions" (
         "times"
     )
 VALUES (
-        '1',
-        'none',
-        'none',
-        'none',
-        'когда нибудь',
-        '10',
-        '1.png',
-        'none',
-        'none',
-        'none',
-        'true',
-        ARRAY['12:00','16:00','19:00']
+        2,
+        2,
+        'Экс 2',
+        'Описание большое 2',
+        'Описание малое 2',
+        '2 час',
+        20,
+        'excursion.png',
+        'маршрут 2 - 2 - 23',
+        'маршрут 2 - 23',
+        'Митинг инфо 2',
+        't',
+        '{22:00,22:22,00:22}'
+    ),
+    (
+        1,
+        1,
+        'Экс 1',
+        'Описание большое 1',
+        'Описание малое 1',
+        '1 час',
+        30,
+        'excursion.png',
+        'маршрут 1 - 2 - 13',
+        'маршрут 1 - 13',
+        'Митинг инфо',
+        't',
+        '{12:00,16:00,19:00}'
     );
 
-INSERT INTO "customers_types" ("name")
-VALUES ('Стандартный тариф');
-INSERT INTO "customers_type_costs" ("excursion_id", "customers_types_id", "cost")
-VALUES ('1', '1', '1111');
+INSERT INTO "customers_type_costs" (
+        "id",
+        "excursion_id",
+        "customers_types_id",
+        "cost"
+    )
+VALUES (1, 1, 1, 100),
+    (2, 1, 1, 200),
+    (3, 2, 1, 300),
+    (4, 2, 2, 400);

@@ -5,7 +5,7 @@ use crate::models::excursion::{Excursion, ExcursionDetails, ExcursionQuery};
 
 #[derive(Deserialize, Serialize,FromRow )]
 struct QueryHelper{
-    remaining_tickets:i64
+    sold_tickets:i64
 }
 
 impl Excursion {
@@ -125,22 +125,23 @@ impl Excursion {
         query: ExcursionQuery,
         connection: &sqlx::Pool<sqlx::Postgres>,
     ) -> Result<i64, sqlx::Error> {
-        let count = sqlx::query_as::<_, QueryHelper>(
+        let count: QueryHelper = sqlx::query_as::<_, QueryHelper>(
             "
             SELECT
-                e.available - SUM(ctct.amount) AS remaining_tickets
+                COALESCE(SUM(cart_to_costs_types.amount),0) as sold_tickets
             FROM
-                excursions e
+                carts 
+            
             LEFT JOIN
-                cart_to_costs_types ctct ON e.id = ctct.customer_type_cost_id
+                cart_to_costs_types ON carts.id = cart_to_costs_types.cart_id 
+
             LEFT JOIN
-                carts c ON ctct.cart_id = c.id
+                customers_type_costs costs on cart_to_costs_types.customer_type_cost_id = costs.id AND costs.excursion_id = $1
+
             WHERE
-                c.date = $3 AND
-                c.time = $2 AND
-                e.id = $1
-            GROUP BY
-                e.available;
+                carts.date = $3 AND
+                carts.time = $2 AND 
+                cart_to_costs_types.customer_type_cost_id = costs.id;
         ",
             
         )
@@ -149,7 +150,7 @@ impl Excursion {
         .bind(query.date,)
         .fetch_one(connection)
         .await?;
-        Ok(count.remaining_tickets)
+        Ok(count.sold_tickets)
     }
 
     pub async fn delete(&self,connection: &sqlx::Pool<sqlx::Postgres>) -> Result<(), sqlx::Error> {
