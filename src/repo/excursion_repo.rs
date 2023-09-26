@@ -136,9 +136,9 @@ impl Excursion {
             LEFT JOIN
                 carts c ON ctct.cart_id = c.id
             WHERE
-                c.date = '2023-10-01' AND
-                c.time = '12:00' AND
-                e.id = 1
+                c.date = $3 AND
+                c.time = $2 AND
+                e.id = $1
             GROUP BY
                 e.available;
         ",
