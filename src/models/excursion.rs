@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
-use super::costs::{CustomersTypeCosts, CustomersTypeCostsReturn};
+use super::costs::CustomersTypeCostsReturn;
 
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct Excursion {

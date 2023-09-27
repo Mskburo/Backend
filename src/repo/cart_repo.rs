@@ -1,5 +1,5 @@
 use sqlx::postgres::PgPool;
-use sqlx::{Connection, Error, Executor};
+use sqlx::Error;
 use tracing::error;
 
 use crate::models::cart::{Cart, HelperSum};
@@ -46,7 +46,7 @@ impl InsertCart {
     .await?;
     
 
-    if let Some(existing_ticket) = existing_ticket {
+    if let Some(_existing_ticket) = existing_ticket {
     let new_ticket: InsertCost = sqlx::query_as::<_, InsertCost>(
         "UPDATE  cart_to_costs_types SET amount = $1
             WHERE customer_type_cost_id = $2 AND cart_id = $3 RETURNING *;"

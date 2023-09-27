@@ -1,17 +1,10 @@
-use actix_web::{delete, get, post, put, web, HttpResponse};
-use uuid::Uuid;
+use actix_web::{get, put, web, HttpResponse};
 
-use crate::{models::{
-    cart::InsertCart,
-    payments::{
-        request::{Amount, Confirmation, PaymentRequest},
-        response::PaymentResponse,
-    },
-}, controllers::payments_controller::create_payment};
+use crate::{models::cart::InsertCart, controllers::payments_controller::create_payment};
 
-use tracing::{debug, error, warn};
+use tracing::error;
 
-use crate::{models::cart::Cart, AppState};
+use crate::AppState;
 
 //CREATE
 #[put("")]

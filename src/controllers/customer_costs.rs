@@ -1,7 +1,7 @@
 use crate::models::costs::CustomersTypeCosts;
 use actix_web::{delete, get, post, put, web, HttpResponse};
 
-use tracing::{error, warn};
+use tracing::error;
 
 use crate::AppState;
 

@@ -1,4 +1,4 @@
-use actix_web::{delete, get, post, put, web, HttpResponse};
+use actix_web::{get, post, web, HttpResponse};
 
 use serde_json::json;
 use tracing::{debug, error};
