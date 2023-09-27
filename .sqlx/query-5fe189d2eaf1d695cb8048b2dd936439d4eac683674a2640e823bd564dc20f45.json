@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO payments (cart_id, payment_id)\n            VALUES ($1, $2)\n            ON CONFLICT (cart_id) DO UPDATE SET payment_id = $2\n            RETURNING *;",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "cart_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "payment_id",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Varchar"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "5fe189d2eaf1d695cb8048b2dd936439d4eac683674a2640e823bd564dc20f45"
+}

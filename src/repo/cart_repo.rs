@@ -1,6 +1,5 @@
 use sqlx::postgres::PgPool;
 use sqlx::Error;
-use tracing::error;
 
 use crate::models::cart::{Cart, HelperSum};
 use crate::models::cart::{InsertCart, InsertCost};
