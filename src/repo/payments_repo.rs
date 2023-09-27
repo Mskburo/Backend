@@ -33,4 +33,19 @@ impl Payment {
 
         Ok(result)
     }
+
+    pub async fn get_by_payment_id(
+        id: String,
+        connection: &PgPool,
+    ) -> Result<Option<Payment>, sqlx::Error> {
+        let result = sqlx::query_as!(
+            Payment,
+            "SELECT * FROM payments WHERE payment_id = $1;",
+            id
+        )
+        .fetch_optional(connection)
+        .await?;
+
+        Ok(result)
+    }
 }

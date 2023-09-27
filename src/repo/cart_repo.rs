@@ -149,17 +149,13 @@ impl InsertCart {
     }
 
 
-    pub async fn update_status_by_id(connection: &PgPool, cart_id:i32, new_status: bool) -> Result<bool, Error> {
+    pub async fn update_status_by_id(connection: &PgPool, cart_id:i32, new_status: bool) -> Result<Cart, Error> {
         let cart = sqlx::query_as::<_, Cart>("UPDATE carts SET is_paid = $1 WHERE id = $2 RETURNING *;")
             .bind(new_status)
             .bind(cart_id)
             .fetch_one(connection)
-            .await;
-        match cart {
-            Ok(_) => return Ok(true),
-            Err(e) =>{error!("{}", e); return Ok(false);},
-        }
-
+            .await?;
+       Ok(cart)
     }
 
     pub async fn get_all(connection: &PgPool) -> Result<Vec<InsertCart>, Error> {

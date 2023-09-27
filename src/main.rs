@@ -126,7 +126,7 @@ async fn main() -> std::io::Result<()> {
                 .service(
                     web::scope("/payments")
                         .service(capture_webhook_event)
-                        .service(capture_payment),
+                        .service(capture_payment_by_id),
                 )
                 .service(web::scope("/carts").service(add_cart)),
         )

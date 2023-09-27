@@ -15,7 +15,7 @@ pub enum WebhookEventType {
 #[derive(Serialize, Deserialize)]
 pub struct Webhook {
     #[serde(rename = "type")]
-    pub webhook_type: WebhookEventType,
+    pub webhook_type: String,
     pub event: String,
     pub object: Object,
 }
@@ -23,7 +23,7 @@ pub struct Webhook {
 #[derive(Serialize, Deserialize)]
 pub struct Object {
     pub id: String,
-    pub status: String,
+    pub status: WebhookEventType,
     pub amount: Amount,
     pub description: String,
     pub recipient: Recipient,
