@@ -23,6 +23,7 @@ use controllers::{
         add_excursion, delete_excursion_by_id, get_all_count_of_remaining_tickets,
         get_all_excursions, get_excursion_by_id, update_excursion_by_id,
     },
+    payments_controller::*,
 };
 
 use dotenv::dotenv;
@@ -81,7 +82,7 @@ async fn main() -> std::io::Result<()> {
                 //ADMIN
                 .service(
                     web::scope("/admin")
-                    .wrap(auth)
+                        .wrap(auth)
                         .service(
                             web::scope("/carts")
                                 .service(get_all_carts)
@@ -121,6 +122,11 @@ async fn main() -> std::io::Result<()> {
                                         .service(get_customer_type_by_id),
                                 ),
                         ),
+                )
+                .service(
+                    web::scope("/payments")
+                        .service(capture_webhook_event)
+                        .service(capture_payment),
                 )
                 .service(web::scope("/carts").service(add_cart)),
         )

@@ -1,8 +1,11 @@
 use sqlx::postgres::PgPool;
 use sqlx::{Connection, Error, Executor};
+use tracing::error;
 
-use crate::models::cart::Cart;
+use crate::models::cart::{Cart, HelperSum};
 use crate::models::cart::{InsertCart, InsertCost};
+
+
 
 impl InsertCart {
     pub async fn insert(&self, connection: &PgPool) -> Result<InsertCart, Error> {
@@ -127,6 +130,36 @@ impl InsertCart {
         .await?;
 
         Ok(InsertCart { cart_info, tickets })
+    }
+
+    
+    pub async fn get_cost(&self, connection: &PgPool) -> Result<f64, Error> {
+        let sum = sqlx::query_as::<_, HelperSum>("
+        SELECT SUM(cost.cost * cart_to_costs_types.amount)
+        from cart_to_costs_types
+        LEFT JOIN customers_type_costs cost on cart_to_costs_types.customer_type_cost_id = cost.id
+        where 
+        cart_to_costs_types.cart_id = $1;
+        ")
+            .bind(&self.cart_info.id)
+            .fetch_one(connection)
+            .await?;
+       
+        Ok(sum.sum)
+    }
+
+
+    pub async fn update_status_by_id(connection: &PgPool, cart_id:i32, new_status: bool) -> Result<bool, Error> {
+        let cart = sqlx::query_as::<_, Cart>("UPDATE carts SET is_paid = $1 WHERE id = $2 RETURNING *;")
+            .bind(new_status)
+            .bind(cart_id)
+            .fetch_one(connection)
+            .await;
+        match cart {
+            Ok(_) => return Ok(true),
+            Err(e) =>{error!("{}", e); return Ok(false);},
+        }
+
     }
 
     pub async fn get_all(connection: &PgPool) -> Result<Vec<InsertCart>, Error> {

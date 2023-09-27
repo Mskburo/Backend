@@ -6,3 +6,4 @@ pub mod default_repo;
 pub mod excursion_type_repo;
 pub mod customer_type_repo;
 pub mod cart_repo;
+pub mod payments_repo;

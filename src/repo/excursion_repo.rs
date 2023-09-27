@@ -120,7 +120,6 @@ impl Excursion {
         Ok(rows_affected)
     }
 
-   
     pub async fn get_remaining(
         query: ExcursionQuery,
         connection: &sqlx::Pool<sqlx::Postgres>,

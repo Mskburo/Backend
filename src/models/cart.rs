@@ -1,6 +1,6 @@
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
-use sqlx::{FromRow, Encode};
+use sqlx::{Encode, FromRow};
 
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct Cart {
@@ -26,4 +26,8 @@ pub struct InsertCost {
 pub struct InsertCart {
     pub cart_info: Cart,
     pub tickets: Vec<InsertCost>,
+}
+#[derive(Deserialize, Serialize, FromRow)]
+pub struct HelperSum {
+    pub sum: f64,
 }

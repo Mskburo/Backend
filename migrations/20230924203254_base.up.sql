@@ -49,6 +49,14 @@ CREATE TABLE carts (
         email ~* '^[A-Za-z0-9._+%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$'
     )
 );
+
+CREATE TABLE payments (
+    cart_id integer NOT NULL,
+    payment_id varchar(40) NOT NULL,
+    PRIMARY KEY (cart_id),
+    CONSTRAINT payments_cart_id_carts_id_foreign FOREIGN KEY (cart_id) REFERENCES carts (id)
+);
+
 CREATE TABLE cart_to_costs_types (
     id serial NOT NULL,
     cart_id integer NOT NULL,
