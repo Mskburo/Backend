@@ -132,7 +132,7 @@ async fn capture_payment(app_state: web::Data<AppState>, id: i32) -> HttpRespons
                             Some(_) => {
                                 let edited_response = json!({"id": res.id, "status":res.status,"amount": format!("{} {}", res.amount.value, res.amount.currency), "captured_at": res.captured_at, "payment_method": res.payment_method});
 
-                                return HttpResponse::PermanentRedirect().append_header(("location", "http://localhost:8081/payment-success")).finish();
+                                return HttpResponse::PermanentRedirect().append_header(("location", "http://mskburo.ru/payment-success")).finish();
                             }
                             None => {
                                 return HttpResponse::InternalServerError()
@@ -187,7 +187,7 @@ pub async fn create_payment(
                     confirmation: Confirmation {
                         confirmation_type: "redirect".to_owned(),
                         return_url: format!(
-                            "http://localhost:8090/api/v1/payments/capture/{}",
+                            "http://mskburo.ru/api/v1/payments/capture/{}",
                             insert_cart.cart_info.id.unwrap_or_default()
                         )
                         .to_owned(), //TODO add value
