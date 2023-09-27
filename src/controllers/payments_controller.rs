@@ -1,4 +1,8 @@
-use actix_web::{get, post, web, HttpResponse};
+use actix_web::{
+    get, post,
+    web::{self, Redirect},
+    HttpResponse, Responder,
+};
 
 use serde_json::json;
 use tracing::{debug, error};
@@ -92,6 +96,8 @@ async fn capture_payment_by_id(
     return capture_payment(app_state, id).await;
 }
 
+
+
 async fn capture_payment(app_state: web::Data<AppState>, id: i32) -> HttpResponse {
     match Payment::get_by_id(id, &app_state.db).await {
         Ok(payment) => {
@@ -126,7 +132,7 @@ async fn capture_payment(app_state: web::Data<AppState>, id: i32) -> HttpRespons
                             Some(_) => {
                                 let edited_response = json!({"id": res.id, "status":res.status,"amount": format!("{} {}", res.amount.value, res.amount.currency), "captured_at": res.captured_at, "payment_method": res.payment_method});
 
-                                return HttpResponse::Accepted().json(edited_response);
+                                return HttpResponse::PermanentRedirect().append_header(("location", "http://localhost:8081/payment-success")).finish();
                             }
                             None => {
                                 return HttpResponse::InternalServerError()

@@ -93,7 +93,8 @@ VALUES (1, 'Автобусные'),
 
 INSERT INTO "customers_types" ("id", "name")
 VALUES (1, 'Дети'),
-    (2, 'Деды');
+    (2, 'Взрослый'),
+    (3, 'Взрослый');
 
 INSERT INTO "excursions" (
         "id",
