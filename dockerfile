@@ -18,5 +18,6 @@ RUN cargo build --release --target x86_64-unknown-linux-musl --bin tour_back
 
 
 FROM alpine AS runtime
+EXPOSE 8090
 COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/tour_back /usr/local/bin/tour_back
 CMD ["/usr/local/bin/tour_back"]
