@@ -1,6 +1,9 @@
 FROM lukemathwalker/cargo-chef:latest-rust-1-alpine3.17 AS chef
 WORKDIR /app
 
+FROM nim65s/cargo-binstall as binstal
+RUN cargo binstall -y --target x86_64-unknown-linux-musl cargo-cache
+
 
 FROM chef AS planner
 COPY Cargo.toml .
@@ -19,8 +22,7 @@ ENV CARGO_HOME=/usr/local/cargo
 ENV SCCACHE_DIR=/usr/local/sccache
 
 RUN apk add musl-dev sccache
-RUN cargo install cargo-cache
-
+COPY --from=binstal /usr/local/cargo/bin/ /usr/local/bin/
 
 COPY ./src ./src
 COPY ./.sqlx ./.sqlx
