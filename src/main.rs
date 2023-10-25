@@ -1,6 +1,7 @@
 pub mod controllers;
 pub mod models;
 pub mod repo;
+pub mod token;
 pub mod validators;
 
 use actix_cors::Cors;
@@ -10,6 +11,7 @@ use actix_web::{
 };
 use actix_web_httpauth::middleware::HttpAuthentication;
 use controllers::{
+    auth::{basic_auth, create_user, generate_access},
     carts_controller::{add_cart, get_all_carts, get_cart_by_id},
     customer_costs::{
         add_customer_cost, delete_customer_cost_by_id, get_customer_cost_by_excursion_id,
@@ -30,6 +32,7 @@ use dotenv::dotenv;
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 use tracing::Level;
 use tracing_subscriber::FmtSubscriber;
+use validators::{validator_acces, validator_refresh};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -65,7 +68,9 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         let cors = Cors::permissive();
-        let auth = HttpAuthentication::bearer(validators::validator);
+        let bearer_middleware_refresh = HttpAuthentication::bearer(validator_refresh);
+        let bearer_middleware_access = HttpAuthentication::bearer(validator_acces);
+        let new_user_validator = HttpAuthentication::bearer(validators::new_user_validator);
         App::new().wrap(cors).service(
             web::scope("api/v1")
                 .app_data(web::Data::new(
@@ -79,10 +84,24 @@ async fn main() -> std::io::Result<()> {
                     }
                     .clone(),
                 ))
+                .service(
+                    web::scope("/auth")
+                        .service(basic_auth)
+                        .service(
+                            web::scope("/new")
+                                .wrap(new_user_validator)
+                                .service(create_user),
+                        )
+                        .service(
+                            web::scope("/token")
+                                .wrap(bearer_middleware_refresh)
+                                .service(generate_access),
+                        ),
+                )
                 //ADMIN
                 .service(
                     web::scope("/admin")
-                        .wrap(auth)
+                        .wrap(bearer_middleware_access)
                         .service(
                             web::scope("/carts")
                                 .service(get_all_carts)

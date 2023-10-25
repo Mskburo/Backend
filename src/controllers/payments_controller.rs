@@ -211,7 +211,7 @@ pub async fn create_payment(
                         };
                         match payment.insert(&app_state.db).await {
                             Ok(_) => {
-                                return HttpResponse::TemporaryRedirect()
+                                return HttpResponse::Ok()
                                     .body(res.confirmation.confirmation_url)
                             }
                             Err(e) => error!("err updating status (db) {}", e),

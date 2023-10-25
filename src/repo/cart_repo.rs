@@ -1,7 +1,7 @@
 use sqlx::postgres::PgPool;
 use sqlx::Error;
 
-use crate::models::cart::{Cart, HelperSum};
+use crate::models::cart::{Cart, HelperSum, CartWithTotalCost, ReturnCart};
 use crate::models::cart::{InsertCart, InsertCost};
 
 
@@ -157,9 +157,15 @@ impl InsertCart {
        Ok(cart)
     }
 
-    pub async fn get_all(connection: &PgPool) -> Result<Vec<InsertCart>, Error> {
-        let mut result = vec![];
-        let carts = sqlx::query_as::<_, Cart>("SELECT * FROM carts;")
+    pub async fn get_all(connection: &PgPool) -> Result<Vec<ReturnCart>, Error> {
+        let mut result: Vec<ReturnCart> = vec![];
+        let carts = sqlx::query_as::<_, CartWithTotalCost>("
+            SELECT c.*, SUM(cost.cost * ctct.amount) as total_cost
+            FROM carts c
+            LEFT JOIN cart_to_costs_types ctct on c.id = ctct.cart_id
+            LEFT JOIN customers_type_costs cost on ctct.customer_type_cost_id = cost.id
+            GROUP BY c.id;
+        ")
             .fetch_all(connection)
             .await?;
         for cart in carts {
@@ -169,8 +175,8 @@ impl InsertCart {
             .bind(cart.id)
             .fetch_all(connection)
             .await?;
-            result.push(InsertCart {
-                cart_info: cart.clone(),
+            result.push(ReturnCart {
+                cart_info: cart.to_owned(),
                 tickets,
             });
         }

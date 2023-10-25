@@ -82,7 +82,7 @@ impl Excursion {
         sqlx::query_as::<_, ExcursionDetails>(
             "
         SELECT *
-        FROM excursion_details WHERE is_active = true
+        FROM excursion_details 
         LIMIT 100;
         ",
         )

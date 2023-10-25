@@ -22,6 +22,7 @@ CREATE TABLE excursions (
     meeting_info text NULL DEFAULT 'none',
     is_active boolean NULL DEFAULT true,
     times varchar(5) ARRAY NOT NULL,
+    week_days integer NOT NULL,
     PRIMARY KEY (id),
     CONSTRAINT excursion_type_exursion_type_id_foreign FOREIGN KEY (excursion_type_id) REFERENCES excursions_types (id)
 );
@@ -67,6 +68,13 @@ CREATE TABLE cart_to_costs_types (
     CONSTRAINT orders_to_tickets_ticket_id_customers_type_costs_id_foreign FOREIGN KEY (customer_type_cost_id) REFERENCES customers_type_costs (id)
 );
 
+CREATE TABLE users (
+    id serial NOT NULL,
+    login varchar(100) NOT NULL,
+    password varchar(255) NOT NULL,
+    PRIMARY KEY (id)
+);
+
 CREATE OR REPLACE VIEW excursion_details AS
 SELECT e.id AS id,
     et.name AS type_name,
@@ -109,7 +117,8 @@ INSERT INTO "excursions" (
         "short_route",
         "meeting_info",
         "is_active",
-        "times"
+        "times",
+        "week_days"
     )
 VALUES (
         2,
@@ -124,7 +133,8 @@ VALUES (
         'маршрут 2 - 23',
         'Митинг инфо 2',
         't',
-        '{22:00,22:22,00:22}'
+        '{22:00,22:22,00:22}',
+        135
     ),
     (
         1,
@@ -139,7 +149,8 @@ VALUES (
         'маршрут 1 - 13',
         'Митинг инфо',
         't',
-        '{12:00,16:00,19:00}'
+        '{12:00,16:00,19:00}',
+        156
     );
 
 INSERT INTO "customers_type_costs" (
