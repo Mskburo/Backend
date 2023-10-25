@@ -6,6 +6,9 @@ if [ $# -ne 1 ]; then
     exit 1
 fi
 
+OUTPUT_TARBALL="docker_image.tar"
+IMAGE_NAME=rust_backend
+
 # Use the provided file path
 FILE_PATH="$1"
 
@@ -18,26 +21,26 @@ else
 fi
 
 # Build the Docker image
-docker build -t $IMAGE_NAME:$IMAGE_TAG -f $FILE_PATH .
+docker compose -f ./build.docker-compose.yaml --env-file .env.rel build
 
 # Check if the build was successful
 if [ $? -eq 0 ]; then
     echo "Docker image build successful."
 
     # Save the Docker image to a tarball file
-    docker save -o $OUTPUT_TARBALL $IMAGE_NAME:$IMAGE_TAG
+    docker save -o $OUTPUT_TARBALL $IMAGE_NAME:latest
 
     if [ $? -eq 0 ]; then
         echo "Docker image saved to $OUTPUT_TARBALL"
 
         # Transfer the tarball to the remote host and load it using ssh
-        cat $OUTPUT_TARBALL | ssh -C $REMOTE_HOST "docker load"
+        cat $OUTPUT_TARBALL | ssh -C $REMOTE_HOST "docker load && cd /root/Mskburo && make lazy"
 
         if [ $? -eq 0 ]; then
             echo "Docker image loaded on the remote host."
 
             # Now, run the restart.sh script on the remote host
-            ssh $REMOTE_HOST 'cd /root/Mskburo && make up'
+            # ssh -C $REMOTE_HOST 'cd /root/Mskburo && make up'
 
         else
             echo "Error loading Docker image on the remote host."

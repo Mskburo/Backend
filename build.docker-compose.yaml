@@ -1,0 +1,15 @@
+version: "3.7"
+
+services:
+  backend:
+    image: rust_backend:latest
+    build: .
+    container_name: rust_backend
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - YOOCASSA_STORE_ID=${YOOCASSA_STORE_ID} 
+      - YOOCASSA_KEY=${YOOCASSA_KEY}
+      - TOKEN=${TOKEN}
+    ports:
+      - '8090:8090'
