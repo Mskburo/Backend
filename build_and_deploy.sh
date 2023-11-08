@@ -10,7 +10,7 @@ OUTPUT_TARBALL="docker_image.tar"
 IMAGE_NAME=rust_backend
 
 # Use the provided file path
-FILE_PATH="$1"
+# FILE_PATH="$1"
 
 # Load environment variables from .env file
 if [[ -f .env ]]; then

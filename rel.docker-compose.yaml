@@ -10,6 +10,7 @@ services:
       - YOOCASSA_STORE_ID=${YOOCASSA_STORE_ID} 
       - YOOCASSA_KEY=${YOOCASSA_KEY}
       - TOKEN=${TOKEN}
+      - JWT_SECRET=${JWT_SECRET}
     ports:
       - '8090:8090'
 

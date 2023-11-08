@@ -88,7 +88,8 @@ SELECT e.id AS id,
     e.route AS route,
     e.short_route AS short_route,
     e.meeting_info AS meeting_info,
-    e.is_active AS is_active
+    e.is_active AS is_active,
+    e.week_days AS week_days
 FROM excursions e
     JOIN excursions_types et ON e.excursion_type_id = et.id;
 
