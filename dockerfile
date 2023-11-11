@@ -11,7 +11,7 @@ COPY Cargo.lock .
 COPY src/main.rs src/main.rs
 RUN cargo chef prepare --recipe-path recipe.json
 
-RUN apk add musl-dev sccache
+RUN apk add musl-dev sccache protoc protobuf-dev
 COPY --from=binstal /usr/local/cargo/bin/ /usr/local/bin/
 RUN cargo cache
 

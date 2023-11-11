@@ -4,6 +4,14 @@ use actix_web::{
     HttpResponse, Responder,
 };
 
+use emails::{EmailRequest, EmailResponse};
+
+use emails::emailer_client::EmailerClient;
+
+pub mod emails {
+    tonic::include_proto!("emails");
+}
+
 use serde_json::json;
 use tracing::{debug, error};
 use uuid::Uuid;
@@ -46,7 +54,10 @@ async fn capture_webhook_event(
                 }
             };
         }
-        WebhookEventType::Succeeded => return HttpResponse::Ok().body("ok"),
+        WebhookEventType::Succeeded => {
+            send_email(&event, app_state).await.unwrap();
+            
+            return HttpResponse::Ok().body("ok");},
         WebhookEventType::Canceled => {
             match Payment::get_by_payment_id(event.object.id, &app_state.db).await {
                 Ok(payment) => match payment {
@@ -96,7 +107,35 @@ async fn capture_payment_by_id(
     return capture_payment(app_state, id).await;
 }
 
+async fn send_email(
+    event_info: &Webhook,
+    app_state: web::Data<AppState>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let mut client = EmailerClient::connect("http://[::1]:50051").await?;
+    let payment_id = &event_info.object.id;
+    let description = &event_info.object.description;
+    match Payment::get_cart_by_payment_id(payment_id.to_string(), &app_state.db).await {
+        Ok(_cart) => match _cart {
+            Some(cart) => {
+                let request = tonic::Request::new(EmailRequest {
+                    teplate: "payment_verification".to_owned(),
+                    to_email: cart.email,
+                    order_id: description.to_string(),
+                    payment_id: payment_id.to_string(),
+                    url: "https://youtu.be/dQw4w9WgXcQ?si=cKqZCyQENMI531Em".to_owned(),
+                });
 
+                let response = client.send_email(request).await?;
+
+                println!("RESPONSE={:?}", response);
+            }
+            None => return Err("Empty email".into()),
+        },
+        Err(e) => return Err(format!("{:#?}", e).into()),
+    }
+
+    Ok(())
+}
 
 async fn capture_payment(app_state: web::Data<AppState>, id: i32) -> HttpResponse {
     match Payment::get_by_id(id, &app_state.db).await {
@@ -130,9 +169,15 @@ async fn capture_payment(app_state: web::Data<AppState>, id: i32) -> HttpRespons
                         debug!("success payment capture");
                         match update_cart_status(&app_state.db, id).await {
                             Some(_) => {
-                                let edited_response = json!({"id": res.id, "status":res.status,"amount": format!("{} {}", res.amount.value, res.amount.currency), "captured_at": res.captured_at, "payment_method": res.payment_method});
+                                //TODO
+                                let _edited_response = json!({"id": res.id, "status":res.status,"amount": format!("{} {}", res.amount.value, res.amount.currency), "captured_at": res.captured_at, "payment_method": res.payment_method});
 
-                                return HttpResponse::PermanentRedirect().append_header(("location", "http://mskburo.ru/payment-success")).finish();
+                                return HttpResponse::PermanentRedirect()
+                                    .append_header((
+                                        "location",
+                                        "http://mskburo.ru/payment-success",
+                                    ))
+                                    .finish();
                             }
                             None => {
                                 return HttpResponse::InternalServerError()
@@ -211,8 +256,7 @@ pub async fn create_payment(
                         };
                         match payment.insert(&app_state.db).await {
                             Ok(_) => {
-                                return HttpResponse::Ok()
-                                    .body(res.confirmation.confirmation_url)
+                                return HttpResponse::Ok().body(res.confirmation.confirmation_url)
                             }
                             Err(e) => error!("err updating status (db) {}", e),
                         }

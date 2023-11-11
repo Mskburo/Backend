@@ -5,6 +5,8 @@ use actix_web::{
     HttpResponse, Responder,
 };
 use actix_web_httpauth::extractors::{basic::BasicAuth, bearer::BearerAuth};
+use tracing::debug;
+
 
 use crate::models::user::*;
 use sqlx;
@@ -27,8 +29,7 @@ async fn create_user(state: Data<AppState>, body: Json<User>) -> impl Responder 
     }
     user.password = hash;
 
-    match user.insert(state).await
-    {
+    match user.insert(state).await {
         Ok(_) => HttpResponse::Ok().body("success"),
         Err(error) => match error {
             sqlx::Error::Database(error) => {
@@ -56,9 +57,9 @@ async fn generate_access(credentials: BearerAuth) -> HttpResponse {
 async fn basic_auth(state: Data<AppState>, credentials: BasicAuth) -> impl Responder {
     let login = credentials.user_id();
     let pass = credentials.password();
-
+    debug!("login {} pass:{:?}", login, pass);
     match pass {
-        None => HttpResponse::Unauthorized().json("Must provide user_name and password"),
+        None => HttpResponse::Unauthorized().body("Must provide user_name and password"),
         Some(pass) => match User::get_user_by_name(login, state).await {
             Ok(user) => {
                 let parsed_hash = PasswordHash::new(&user.password).unwrap();

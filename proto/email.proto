@@ -1,0 +1,18 @@
+syntax = "proto3";
+package emails;
+
+service Emailer {
+    rpc SendEmail (EmailRequest) returns (EmailResponse);
+}
+
+message EmailRequest {
+    string teplate  = 1;
+    string to_email = 2;
+    string order_id = 3;
+    string payment_id  = 4;
+    string url = 5;
+}
+message EmailResponse {
+    bool successful = 1;
+    string message = 2;
+}

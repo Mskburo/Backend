@@ -1,6 +1,6 @@
 use sqlx::PgPool;
 
-use crate::models::payments::Payment;
+use crate::models::{payments::Payment, cart::Cart};
 
 impl Payment {
     pub async fn insert(&self, connection: &PgPool) -> Result<Payment, sqlx::Error> {
@@ -48,4 +48,23 @@ impl Payment {
 
         Ok(result)
     }
+    pub async fn get_cart_by_payment_id(
+        id: String,
+        connection: &PgPool,
+    ) -> Result<Option<Cart>, sqlx::Error> {
+        let result = sqlx::query_as!(
+            Cart,
+            " SELECT c.id, c.date, c.time, c.name, c.tel, c.email, c.bill, c.created_at, c.is_paid
+              FROM carts c
+              JOIN payments p ON c.id = p.cart_id
+              WHERE p.payment_id = $1;",
+            id
+        )
+        .fetch_optional(connection)
+        .await?;
+
+        Ok(result)
+    }
+
+   
 }
