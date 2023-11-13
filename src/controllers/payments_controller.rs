@@ -111,7 +111,8 @@ async fn send_email(
     event_info: &Webhook,
     app_state: web::Data<AppState>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let mut client = EmailerClient::connect("http://[::1]:50051").await?;
+    let emailer_url = std::env::var("EMAILER_URL").expect("EMAILER_URL must be set");
+    let mut client = EmailerClient::connect(emailer_url).await?;
     let payment_id = &event_info.object.id;
     let description = &event_info.object.description;
     match Payment::get_cart_by_payment_id(payment_id.to_string(), &app_state.db).await {
