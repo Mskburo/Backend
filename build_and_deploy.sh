@@ -6,9 +6,8 @@ if [ $# -ne 1 ]; then
     exit 1
 fi
 
-OUTPUT_TARBALL="docker_image.tar"
 IMAGE_NAME=rust_backend
-
+OUTPUT_TARBALL="$IMAGE_NAME.tar"
 # Use the provided file path
 # FILE_PATH="$1"
 

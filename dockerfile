@@ -31,7 +31,7 @@ COPY ./src ./src
 COPY ./proto ./proto
 COPY ./.sqlx ./.sqlx
 # Copy over the cached dependencies
-COPY --from=cacher /app/target/x86_64-unknown-linux-musl/ /app/target/x86_64-unknown-linux-musl/
+COPY --from=cacher /app/target/ /app/target/
 ARG SQLX_OFFLINE=true
 RUN cargo build --release --target x86_64-unknown-linux-musl --bin tour_back
 
