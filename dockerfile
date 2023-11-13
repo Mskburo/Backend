@@ -11,8 +11,8 @@ COPY Cargo.lock .
 COPY src/main.rs src/main.rs
 RUN cargo chef prepare --recipe-path recipe.json
 
-RUN apk add musl-dev sccache protoc protobuf-dev
-COPY --from=binstal /usr/local/cargo/bin/ /usr/local/bin/
+RUN apk add musl-dev sccache protoc protobuf-dev openssl
+COPY --from=binstal /usr/local/cargo/bin/cargo-cache /usr/local/bin/cargo-cache
 RUN cargo cache
 
 FROM chef AS cacher 
@@ -23,12 +23,15 @@ RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path r
 FROM chef AS builder 
 ENV CARGO_HOME=/usr/local/cargo
 ENV SCCACHE_DIR=/usr/local/sccache
-COPY ./src ./src
-COPY ./.sqlx ./.sqlx
+RUN apk add musl-dev sccache protoc protobuf-dev openssl
 COPY Cargo.toml .
 COPY Cargo.lock .
+COPY build.rs .
+COPY ./src ./src
+COPY ./proto ./proto
+COPY ./.sqlx ./.sqlx
 # Copy over the cached dependencies
-COPY --from=cacher /app/target/ /app/target/
+COPY --from=cacher /app/target/x86_64-unknown-linux-musl/ /app/target/x86_64-unknown-linux-musl/
 ARG SQLX_OFFLINE=true
 RUN cargo build --release --target x86_64-unknown-linux-musl --bin tour_back
 
