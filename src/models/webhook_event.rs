@@ -29,7 +29,7 @@ pub struct Object {
     pub recipient: Recipient,
     pub payment_method: PaymentMethod,
     pub created_at: String,
-    pub expires_at: String,
+    pub captured_at: String,
     pub test: bool,
     pub paid: bool,
     pub refundable: bool,

@@ -12,5 +12,6 @@ services:
       - YOOCASSA_KEY=${YOOCASSA_KEY}
       - TOKEN=${TOKEN}
       - JWT_SECRET=${JWT_SECRET}
+      - EMAILER_URL=${EMAILER_URL}
     ports:
       - '8090:8090'

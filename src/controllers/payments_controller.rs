@@ -56,8 +56,9 @@ async fn capture_webhook_event(
         }
         WebhookEventType::Succeeded => {
             send_email(&event, app_state).await.unwrap();
-            
-            return HttpResponse::Ok().body("ok");},
+
+            return HttpResponse::Ok().body("ok");
+        }
         WebhookEventType::Canceled => {
             match Payment::get_by_payment_id(event.object.id, &app_state.db).await {
                 Ok(payment) => match payment {
@@ -121,7 +122,7 @@ async fn send_email(
                 let request = tonic::Request::new(EmailRequest {
                     teplate: "payment_verification".to_owned(),
                     to_email: cart.email,
-                    order_id: description.to_string(),
+                    description: description.to_string(),
                     payment_id: payment_id.to_string(),
                     url: "https://youtu.be/dQw4w9WgXcQ?si=cKqZCyQENMI531Em".to_owned(),
                 });
