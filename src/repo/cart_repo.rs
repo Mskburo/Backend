@@ -157,17 +157,28 @@ impl InsertCart {
        Ok(cart)
     }
 
-    pub async fn get_all(connection: &PgPool) -> Result<Vec<ReturnCart>, Error> {
-        let mut result: Vec<ReturnCart> = vec![];
-        let carts = sqlx::query_as::<_, CartWithTotalCost>("
-            SELECT c.*, SUM(cost.cost * ctct.amount) as total_cost
-            FROM carts c
-            LEFT JOIN cart_to_costs_types ctct on c.id = ctct.cart_id
-            LEFT JOIN customers_type_costs cost on ctct.customer_type_cost_id = cost.id
-            GROUP BY c.id;
-        ")
-            .fetch_all(connection)
-            .await?;
+    pub async fn get_all(connection: &PgPool, is_sort_by_order_date: Option<bool>, date: Option<chrono::naive::NaiveDate>) -> Result<Vec<ReturnCart>, Error> {
+
+    let mut result: Vec<ReturnCart> = vec![];
+    let query = 
+    format!(
+        "SELECT c.*, SUM(cost.cost * ctct.amount) as total_cost
+        FROM carts c
+        LEFT JOIN cart_to_costs_types ctct ON c.id = ctct.cart_id
+        LEFT JOIN customers_type_costs cost ON ctct.customer_type_cost_id = cost.id
+        {}
+        GROUP BY c.id
+        ORDER BY {} DESC
+        LIMIT 200",
+        if date.is_some() { "WHERE date = DATE($1)" } else { "" },
+        if is_sort_by_order_date.unwrap_or(false) { "date" } else { "created_at" }
+    );
+   
+
+    let carts = sqlx::query_as::<_, CartWithTotalCost>(&query)
+        .bind(date) // Binding for ORDER BY clause
+        .fetch_all(connection)
+        .await?;
         for cart in carts {
             let tickets = sqlx::query_as::<_, InsertCost>(
                 "SELECT * FROM cart_to_costs_types  WHERE cart_id  = $1;",

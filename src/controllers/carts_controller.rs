@@ -1,4 +1,5 @@
 use actix_web::{get, put, web, HttpResponse};
+use serde::Deserialize;
 
 use crate::{models::cart::InsertCart, controllers::payments_controller::create_payment};
 
@@ -20,12 +21,17 @@ async fn add_cart(app_state: web::Data<AppState>, json: web::Json<InsertCart>) -
     }
 }
 
-
+#[derive(Deserialize)]
+struct GetCartsQuery {
+    #[serde(rename = "sortByExcursionDate")]
+    sort_by_excursion_date: Option<bool>,
+    date:  Option<chrono::naive::NaiveDate>
+}
 
 //READ
 #[get("")]
-async fn get_all_carts(app_state: web::Data<AppState>) -> HttpResponse {
-    match InsertCart::get_all(&app_state.db).await {
+async fn get_all_carts(app_state: web::Data<AppState>, info: web::Query<GetCartsQuery>) -> HttpResponse {
+    match InsertCart::get_all(&app_state.db, info.sort_by_excursion_date, info.date).await {
         Ok(result) => HttpResponse::Accepted().json(result),
         Err(e) => {
             error!("{}", e);
