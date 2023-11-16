@@ -12,7 +12,7 @@ use actix_web::{
 use actix_web_httpauth::middleware::HttpAuthentication;
 use controllers::{
     auth::{basic_auth, create_user, generate_access},
-    carts_controller::{add_cart, get_all_carts, get_cart_by_id},
+    carts_controller::{add_cart, get_all_carts, get_cart_by_id, update_cart_payment_status},
     customer_costs::{
         add_customer_cost, delete_customer_cost_by_id, get_customer_cost_by_excursion_id,
         update_customer_cost_by_id,
@@ -113,6 +113,7 @@ async fn main() -> std::io::Result<()> {
                         .service(
                             web::scope("/carts")
                                 .service(get_all_carts)
+                                .service(update_cart_payment_status)
                                 .service(get_cart_by_id),
                         )
                         .service(
