@@ -1,11 +1,9 @@
 use actix_web::{
     get, post,
-    web::{self, Redirect},
-    HttpResponse, Responder,
+    web::{self},
+    HttpResponse ,
 };
-
 use emails::EmailRequest;
-
 use emails::emailer_client::EmailerClient;
 
 pub mod emails {
