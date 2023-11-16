@@ -158,7 +158,7 @@ impl InsertCart {
     }
 
     pub async fn get_all(connection: &PgPool, is_sort_by_order_date: Option<bool>, date: Option<chrono::naive::NaiveDate>) -> Result<Vec<ReturnCart>, Error> {
-
+    let sort_column =if is_sort_by_order_date.unwrap_or(false) { "date" } else { "created_at" }; 
     let mut result: Vec<ReturnCart> = vec![];
     let query = 
     format!(
@@ -170,8 +170,8 @@ impl InsertCart {
         GROUP BY c.id
         ORDER BY {} DESC
         LIMIT 200",
-        if date.is_some() { "WHERE date = DATE($1)" } else { "" },
-        if is_sort_by_order_date.unwrap_or(false) { "date" } else { "created_at" }
+        if date.is_some() { format!("WHERE {}::date = $1", sort_column) } else { "".to_owned() },
+        sort_column
     );
    
 
