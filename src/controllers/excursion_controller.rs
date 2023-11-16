@@ -1,6 +1,6 @@
 use actix_web::{delete, get, post, put, web, HttpResponse};
 
-use crate::models::{excursion::{Excursion, ExcursionQuery, ExcursionWithCosts}, costs::CustomersTypeCosts, carts_to_costs_types::CartToCostsTypes};
+use crate::models::{excursion::{Excursion, ExcursionQuery, ExcursionWithCosts}, costs::CustomersTypeCosts};
 use tracing::error;
 
 use crate::AppState;
