@@ -25,7 +25,7 @@ use controllers::{
         add_excursion, delete_excursion_by_id, get_all_count_of_remaining_tickets,
         get_all_excursions, get_excursion_by_id, update_excursion_by_id,
     },
-    payments_controller::*,
+    payments_controller::*, qrs_controller::{get_qrs_by_id, add_qrs, delete_qrs_by_id, increment_qrs_count_by_id, update_qr, get_all_qrs},
 };
 
 use dotenv::dotenv;
@@ -103,6 +103,14 @@ async fn main() -> std::io::Result<()> {
                     web::scope("/admin")
                         .wrap(bearer_middleware_access)
                         .service(
+                            web::scope("/qr")
+                                .service(add_qrs)
+                                .service(get_all_qrs)
+                                .service(get_qrs_by_id)
+                                .service(delete_qrs_by_id)
+                                .service(update_qr),
+                        )
+                        .service(
                             web::scope("/carts")
                                 .service(get_all_carts)
                                 .service(get_cart_by_id),
@@ -127,6 +135,7 @@ async fn main() -> std::io::Result<()> {
                         ),
                 )
                 //CLIENT
+                .service(increment_qrs_count_by_id)
                 .service(
                     web::scope("/excursions")
                         .service(get_all_excursions)

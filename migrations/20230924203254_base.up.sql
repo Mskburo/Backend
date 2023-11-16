@@ -75,6 +75,20 @@ CREATE TABLE users (
     PRIMARY KEY (id)
 );
 
+CREATE TABLE qrs (
+    id serial NOT NULL,
+    name varchar(255) NOT NULL,
+    count integer NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE OR REPLACE FUNCTION increase_qr_count_by_id(p_id INT) RETURNS VOID AS $$ BEGIN
+    UPDATE qrs
+    SET count = count + 1
+    WHERE id = p_id;
+    END;
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE VIEW excursion_details AS
 SELECT e.id AS id,
     et.name AS type_name,

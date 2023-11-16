@@ -7,3 +7,4 @@ DROP TABLE customers_type_costs CASCADE;
 DROP TABLE cart_to_costs_types;
 DROP TABLE payments;
 DROP TABLE users;
+DROP TABLE qrs;

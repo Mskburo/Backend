@@ -4,7 +4,7 @@ use actix_web::{
     HttpResponse, Responder,
 };
 
-use emails::{EmailRequest, EmailResponse};
+use emails::EmailRequest;
 
 use emails::emailer_client::EmailerClient;
 

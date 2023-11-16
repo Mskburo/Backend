@@ -5,3 +5,4 @@ pub mod cart;
 pub mod payments;
 pub mod webhook_event;
 pub mod user;
+pub mod qrs;

@@ -4,3 +4,4 @@ pub mod customer_costs;
 pub mod carts_controller;
 pub mod payments_controller;
 pub mod auth;
+pub mod qrs_controller;
