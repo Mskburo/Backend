@@ -1,7 +1,7 @@
 use serde::{Serialize, Deserialize};
-use sqlx::FromRow;
+use sqlx::{FromRow, PgPool, Error};
 
-use crate::models::excursion::{Excursion, ExcursionDetails, ExcursionQuery};
+use crate::models::{excursion::{Excursion, ExcursionDetails, ExcursionQuery}, costs::CustomersTypeCostsReturn};
 
 #[derive(Deserialize, Serialize,FromRow )]
 struct QueryHelper{
@@ -179,5 +179,25 @@ impl Excursion {
         .execute(connection)
         .await?;
         Ok(())
+    }
+
+     pub async fn get_types_by_excursion_id(
+        id: i32,
+        connection: &PgPool,
+    ) -> Result<Vec<CustomersTypeCostsReturn>, Error> {
+        let result = sqlx::query_as::<_, CustomersTypeCostsReturn>(
+        "SELECT customers_type_costs.id,
+                    name AS customers_type_name,
+                    cost,
+                    excursion_id
+            FROM customers_type_costs
+            LEFT JOIN customers_types ON customers_type_costs.customers_types_id = customers_types.id
+            WHERE excursion_id = $1
+            ;",
+        ).bind(id)
+        .fetch_all(connection)
+        .await?;
+
+        Ok(result)
     }
 }

@@ -1,7 +1,7 @@
 use sqlx::postgres::PgPool;
 use sqlx::Error;
 
-use crate::models::cart::{Cart, HelperSum, CartWithTotalCost, ReturnCart};
+use crate::models::cart::{Cart, HelperSum, CartWithTotalCost, ReturnCart, JoinedCostInfo};
 use crate::models::cart::{InsertCart, InsertCost};
 
 
@@ -162,12 +162,13 @@ impl InsertCart {
     let mut result: Vec<ReturnCart> = vec![];
     let query = 
     format!(
-        "SELECT c.*, SUM(cost.cost * ctct.amount) as total_cost
+        "SELECT c.*, SUM(cost.cost * ctct.amount) as total_cost, excursions.name as excursion_name, cost.excursion_id 
         FROM carts c
         LEFT JOIN cart_to_costs_types ctct ON c.id = ctct.cart_id
         LEFT JOIN customers_type_costs cost ON ctct.customer_type_cost_id = cost.id
+        LEFT JOIN excursions ON cost.excursion_id = excursions.id
         {}
-        GROUP BY c.id
+        GROUP BY c.id, excursions.name, cost.excursion_id 
         ORDER BY {} DESC
         LIMIT 200",
         if date.is_some() { format!("WHERE {}::date = $1", sort_column) } else { "".to_owned() },
@@ -180,8 +181,12 @@ impl InsertCart {
         .fetch_all(connection)
         .await?;
         for cart in carts {
-            let tickets = sqlx::query_as::<_, InsertCost>(
-                "SELECT * FROM cart_to_costs_types  WHERE cart_id  = $1;",
+            let tickets = sqlx::query_as::<_, JoinedCostInfo>(
+                "SELECT types.amount, cost.cost, c_types.name
+                        FROM cart_to_costs_types types
+                            LEFT JOIN customers_type_costs cost ON types.customer_type_cost_id = cost.id
+                            LEFT JOIN customers_types c_types ON cost.customers_types_id = c_types.id   
+                    WHERE types.cart_id =$1;",
             )
             .bind(cart.id)
             .fetch_all(connection)

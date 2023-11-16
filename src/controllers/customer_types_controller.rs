@@ -17,7 +17,7 @@ async fn add_customer_type(
 }
 
 //READ
-#[get("")]
+#[get("/")]
 async fn get_all_customer_type(app_state: web::Data<AppState>) -> HttpResponse {
     match CustomersTypes::get_all(&app_state.db).await {
         Ok(result) => HttpResponse::Accepted().json(result),

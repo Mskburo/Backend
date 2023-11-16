@@ -23,7 +23,7 @@ use controllers::{
     },
     excursion_controller::{
         add_excursion, delete_excursion_by_id, get_all_count_of_remaining_tickets,
-        get_all_excursions, get_excursion_by_id, update_excursion_by_id,
+        get_all_excursions, get_excursion_by_id, update_excursion_by_id, get_excursion_types_by_id,
     },
     payments_controller::*, qrs_controller::{get_qrs_by_id, add_qrs, delete_qrs_by_id, increment_qrs_count_by_id, update_qr, get_all_qrs},
 };
@@ -142,6 +142,7 @@ async fn main() -> std::io::Result<()> {
                         .service(get_all_excursions)
                         .service(get_excursion_by_id)
                         .service(get_all_count_of_remaining_tickets)
+                        .service(get_excursion_types_by_id)
                         .service(
                             web::scope("/costs")
                                 .service(get_customer_cost_by_excursion_id)

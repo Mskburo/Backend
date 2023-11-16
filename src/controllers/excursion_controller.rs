@@ -1,6 +1,6 @@
 use actix_web::{delete, get, post, put, web, HttpResponse};
 
-use crate::models::{excursion::{Excursion, ExcursionQuery, ExcursionWithCosts}, costs::CustomersTypeCosts};
+use crate::models::{excursion::{Excursion, ExcursionQuery, ExcursionWithCosts}, costs::CustomersTypeCosts, carts_to_costs_types::CartToCostsTypes};
 use tracing::error;
 
 use crate::AppState;
@@ -69,6 +69,20 @@ async fn get_excursion_by_id(
     }
 }
 
+#[get("/{excursion_id}/types")]
+async fn get_excursion_types_by_id(
+    app_state: web::Data<AppState>,
+    excursion_id: web::Path<i32>,
+) -> HttpResponse {
+    let excursion_id = excursion_id.into_inner();
+    match Excursion::get_types_by_excursion_id(excursion_id, &app_state.db).await {
+        Ok(result) => HttpResponse::Accepted().json(result),
+        Err(e) => {
+            error!("{}", e);
+            return HttpResponse::BadRequest().body(format!("{}", e));
+        }
+    }
+}
 //Update
 #[post("/{excursion_id}")]
 async fn update_excursion_by_id(

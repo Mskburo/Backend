@@ -30,6 +30,8 @@ pub struct CartWithTotalCost {
     pub created_at: Option<chrono::DateTime<Utc>>,
     #[serde(skip_deserializing)]
     pub is_paid: Option<bool>,
+    pub excursion_name: Option<String>,
+    pub excursion_id: Option<i32>,
     pub total_cost: f64
 }
 
@@ -37,6 +39,13 @@ pub struct CartWithTotalCost {
 pub struct InsertCost {
     pub customer_type_cost_id: i32,
     pub amount: i32,
+}
+
+#[derive(Deserialize, Serialize, FromRow)]
+pub struct JoinedCostInfo {
+    pub amount: i32,
+    pub cost: f64,
+    pub name: String,
 }
 #[derive(Deserialize, Serialize)]
 pub struct InsertCart {
@@ -47,7 +56,7 @@ pub struct InsertCart {
 #[derive(Deserialize, Serialize)]
 pub struct ReturnCart {
     pub cart_info: CartWithTotalCost,
-    pub tickets: Vec<InsertCost>,
+    pub tickets: Vec<JoinedCostInfo>,
 }
 #[derive(Deserialize, Serialize, FromRow)]
 pub struct HelperSum {
