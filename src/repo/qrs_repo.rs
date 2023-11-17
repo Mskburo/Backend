@@ -53,10 +53,9 @@ impl Qrs {
         let result = sqlx::query_as!(
             Qrs,
             "UPDATE qrs
-            SET  id = $1, name = $2, count = $3
-            WHERE id = $4
+            SET  name = $1, count = $2
+            WHERE id = $3
             returning *",
-            &self.id.unwrap_or(1),
             &self.name,
             &self.count,
             id
