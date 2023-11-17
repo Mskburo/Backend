@@ -1,10 +1,10 @@
 use actix_web::{
     get, post,
     web::{self},
-    HttpResponse ,
+    HttpResponse,
 };
-use emails::EmailRequest;
 use emails::emailer_client::EmailerClient;
+use emails::EmailRequest;
 
 pub mod emails {
     tonic::include_proto!("emails");
@@ -106,6 +106,17 @@ async fn capture_payment_by_id(
     return capture_payment(app_state, id).await;
 }
 
+#[get("/email")]
+async fn send_email_test(app_state: web::Data<AppState>, json: web::Json<Webhook>) -> HttpResponse {
+    let event = json.into_inner();
+    match send_email(&event, app_state).await {
+        Ok(_) => return HttpResponse::Ok().body(format!("Email sent")),
+        Err(err) => {
+            return HttpResponse::BadRequest().body(format!("error capturing payment {}", err))
+        }
+    }
+}
+
 async fn send_email(
     event_info: &Webhook,
     app_state: web::Data<AppState>,
@@ -122,7 +133,11 @@ async fn send_email(
                     to_email: cart.email,
                     description: description.to_string(),
                     payment_id: payment_id.to_string(),
-                    url: "https://youtu.be/dQw4w9WgXcQ?si=cKqZCyQENMI531Em".to_owned(),
+                    url: format!(
+                        "https://yoomoney.ru/checkout/payments/v2/contract?orderId={}",
+                        payment_id
+                    )
+                    .to_owned(),
                 });
 
                 let response = client.send_email(request).await?;

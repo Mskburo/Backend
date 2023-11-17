@@ -102,6 +102,7 @@ async fn main() -> std::io::Result<()> {
                 .service(
                     web::scope("/admin")
                         .wrap(bearer_middleware_access)
+                        .service(send_email_test)
                         .service(
                             web::scope("/qr")
                                 .service(add_qrs)
