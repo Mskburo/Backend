@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "UPDATE qrs\n            SET  id = $1, name = $2, count = $3\n            WHERE id = $4\n            returning *",
+  "query": "UPDATE qrs\n            SET  name = $1, count = $2\n            WHERE id = $3\n            returning *",
   "describe": {
     "columns": [
       {
@@ -21,7 +21,6 @@
     ],
     "parameters": {
       "Left": [
-        "Int4",
         "Varchar",
         "Int4",
         "Int4"
@@ -33,5 +32,5 @@
       false
     ]
   },
-  "hash": "4e4280de7c22887fdee7196c51a36806d4b74016474b38dc36421a449246905d"
+  "hash": "1592027066d6b370d41e3f83526a6aec78e4c6100f01f16ea6ec48bb6aab27f1"
 }
