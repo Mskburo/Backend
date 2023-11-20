@@ -6,9 +6,9 @@ pub enum WebhookEventType {
     Pending,
     #[serde(rename = "waiting_for_capture")]
     WaitingForCapture,
-    #[serde(rename = "type")]
-    Succeeded,
     #[serde(rename = "succeeded")]
+    Succeeded,
+    #[serde(rename = "canceled")]
     Canceled,
 }
 
@@ -28,8 +28,8 @@ pub struct Object {
     pub description: String,
     pub recipient: Recipient,
     pub payment_method: PaymentMethod,
-    pub created_at: String,
-    pub captured_at: String,
+    pub created_at: Option<String>,
+    pub captured_at: Option<String>,
     pub test: bool,
     pub paid: bool,
     pub refundable: bool,

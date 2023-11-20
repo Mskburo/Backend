@@ -53,9 +53,14 @@ async fn capture_webhook_event(
             };
         }
         WebhookEventType::Succeeded => {
-            send_email(&event, app_state).await.unwrap();
+            match send_email(&event,app_state).await {
+                Ok(_) => HttpResponse::Ok().body("ok"),
+                Err(err) => {
+                    eprintln!("Error sending email: {:?}", err);
 
-            return HttpResponse::Ok().body("ok");
+                    HttpResponse::InternalServerError().body("Internal Server Error")
+                }
+            }
         }
         WebhookEventType::Canceled => {
             match Payment::get_by_payment_id(event.object.id, &app_state.db).await {
