@@ -143,6 +143,11 @@ async fn send_email(
                         payment_id
                     )
                     .to_owned(),
+                    date: cart.date.to_string(),
+                    time: cart.time.to_string(),
+                    cost: cart.total_cost as f32,
+                    excursion_name: cart.excursion_name.unwrap_or("".to_owned()),
+                    user_name: cart.name,
                 });
 
                 let response = client.send_email(request).await?;

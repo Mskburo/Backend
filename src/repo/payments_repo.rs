@@ -1,6 +1,6 @@
 use sqlx::PgPool;
 
-use crate::models::{payments::Payment, cart::Cart};
+use crate::models::{payments::Payment, cart::CartWithTotalCost};
 
 impl Payment {
     pub async fn insert(&self, connection: &PgPool) -> Result<Payment, sqlx::Error> {
@@ -48,18 +48,22 @@ impl Payment {
 
         Ok(result)
     }
+
     pub async fn get_cart_by_payment_id(
         id: String,
         connection: &PgPool,
-    ) -> Result<Option<Cart>, sqlx::Error> {
-        let result = sqlx::query_as!(
-            Cart,
-            " SELECT c.id, c.date, c.time, c.name, c.tel, c.email, c.bill, c.created_at, c.is_paid
+    ) -> Result<Option<CartWithTotalCost>, sqlx::Error> {
+        let result = sqlx::query_as::<_,CartWithTotalCost>(
+            " SELECT c.id, c.date, c.time, c.name, c.tel, c.email, c.bill, c.created_at, c.is_paid, SUM(cost.cost * ctct.amount) as total_cost, excursions.name as excursion_name, excursions.id as excursion_id
               FROM carts c
               JOIN payments p ON c.id = p.cart_id
-              WHERE p.payment_id = $1;",
-            id
-        )
+              LEFT JOIN cart_to_costs_types ctct ON c.id = ctct.cart_id
+              LEFT JOIN customers_type_costs cost ON ctct.customer_type_cost_id = cost.id
+              LEFT JOIN excursions ON cost.excursion_id = excursions.id
+              WHERE p.payment_id = $1
+              GROUP BY c.id, excursions.name, excursions.id ;",
+            
+        ).bind(id)
         .fetch_optional(connection)
         .await?;
 
