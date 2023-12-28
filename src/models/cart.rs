@@ -32,7 +32,8 @@ pub struct CartWithTotalCost {
     pub is_paid: Option<bool>,
     pub excursion_name: Option<String>,
     pub excursion_id: Option<i32>,
-    pub total_cost: f64
+    pub total_cost: f64,
+    pub meeting_info: Option<String>,
 }
 
 #[derive(Deserialize, Serialize, FromRow)]

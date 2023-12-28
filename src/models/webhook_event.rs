@@ -52,7 +52,7 @@ pub struct PaymentMethod {
     pub id: String,
     pub saved: bool,
     pub title: String,
-    pub account_number: String,
+    pub account_number: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]

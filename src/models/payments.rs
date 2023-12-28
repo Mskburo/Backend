@@ -112,7 +112,7 @@ pub mod done_response {
         pub id: String,
         pub saved: bool,
         pub title: String,
-        pub account_number: String,
+        pub account_number: Option<String>,
     }
 
     #[derive(Serialize, Deserialize)]

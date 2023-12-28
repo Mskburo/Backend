@@ -148,6 +148,7 @@ async fn send_email(
                     cost: cart.total_cost as f32,
                     excursion_name: cart.excursion_name.unwrap_or("".to_owned()),
                     user_name: cart.name,
+                    meeting_info: cart.meeting_info.unwrap_or("".to_owned()),
                 });
 
                 let response = client.send_email(request).await?;
@@ -195,7 +196,7 @@ async fn capture_payment(app_state: web::Data<AppState>, id: i32) -> HttpRespons
                         match update_cart_status(&app_state.db, id).await {
                             Some(_) => {
                                 //TODO
-                                let _edited_response = json!({"id": res.id, "status":res.status,"amount": format!("{} {}", res.amount.value, res.amount.currency), "captured_at": res.captured_at, "payment_method": res.payment_method});
+                                // let _edited_response = json!({"id": res.id, "status":res.status,"amount": format!("{} {}", res.amount.value, res.amount.currency), "captured_at": res.captured_at, "payment_method": res.payment_method});
 
                                 return HttpResponse::PermanentRedirect()
                                     .append_header((
