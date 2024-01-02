@@ -162,14 +162,14 @@ impl InsertCart {
     let mut result: Vec<ReturnCart> = vec![];
     let query = 
     format!(
-        "SELECT c.*, SUM(cost.cost * ctct.amount) as total_cost, excursions.name as excursion_name, cost.excursion_id, payments.payment_id as bill
+        "SELECT c.*, SUM(cost.cost * ctct.amount) as total_cost, excursions.name as excursion_name, cost.excursion_id, payments.payment_id as bill, excursions.meeting_info as meeting_info
         FROM carts c
         LEFT JOIN cart_to_costs_types ctct ON c.id = ctct.cart_id
         LEFT JOIN customers_type_costs cost ON ctct.customer_type_cost_id = cost.id
         LEFT JOIN excursions ON cost.excursion_id = excursions.id
         LEFT JOIN payments ON c.id = payments.cart_id
         {}
-        GROUP BY c.id, excursions.name, cost.excursion_id, payments.payment_id
+        GROUP BY c.id, excursions.name, cost.excursion_id, payments.payment_id, meeting_info
         ORDER BY {} DESC
         LIMIT 200",
         if date.is_some() { format!("WHERE {}::date = $1", sort_column) } else { "".to_owned() },

@@ -1,5 +1,9 @@
-use actix_web_httpauth::extractors::{AuthenticationError, bearer::{BearerAuth, self}};
 use actix_web::{dev::ServiceRequest, Error, HttpMessage};
+use actix_web_httpauth::extractors::{
+    bearer::{self, BearerAuth},
+    AuthenticationError,
+};
+use tracing::warn;
 
 pub async fn new_user_validator(
     req: ServiceRequest,
@@ -9,21 +13,19 @@ pub async fn new_user_validator(
     if credentials.token() == token {
         Ok(req)
     } else {
-        let config = req.app_data::<bearer::Config>()
+        let config = req
+            .app_data::<bearer::Config>()
             .cloned()
             .unwrap_or_default()
             .scope("urn:example:channel=HBO&urn:example:rating=G,PG-13");
-
+        warn!("{:?}",  req);
         Err((AuthenticationError::from(config).into(), req))
     }
 }
 
-
 use chrono::Utc;
 
-use crate::token::{TokenType, TokenClaims};
-
-
+use crate::token::{TokenClaims, TokenType};
 
 pub async fn validator_refresh(
     req: ServiceRequest,
@@ -46,6 +48,7 @@ async fn validator(
     match TokenClaims::get_token_claims(credentials.token()) {
         Ok(value) => {
             if value.token_type != token_type {
+               warn!("{:?}",  req);
                 return Err((
                     AuthenticationError::from(bearer::Config::default()).into(),
                     req,
@@ -53,6 +56,7 @@ async fn validator(
             }
 
             if value.exp < Utc::now().timestamp() as usize {
+                warn!("{:?}",  req);
                 return Err((
                     AuthenticationError::from(bearer::Config::default()).into(),
                     req,
@@ -68,6 +72,7 @@ async fn validator(
                 .cloned()
                 .unwrap_or_default()
                 .scope("");
+           warn!("{:?}",  req);
             Err((AuthenticationError::from(config).into(), req))
         }
     }
