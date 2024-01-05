@@ -42,14 +42,14 @@ pub mod response {
         pub id: String,
         pub status: String,
         pub amount: Amount,
-        pub description: String,
+        pub description: Option<String>,
         pub recipient: Recipient,
         pub created_at: String,
-        pub confirmation: Confirmation,
+        pub confirmation: Option<Confirmation>,
         pub test: bool,
         pub paid: bool,
         pub refundable: bool,
-        pub metadata: Metadata,
+        pub metadata: Option<Metadata>,
     }
 
     #[derive(Serialize, Deserialize, Debug)]
@@ -111,7 +111,7 @@ pub mod done_response {
         pub payment_method_type: String,
         pub id: String,
         pub saved: bool,
-        pub title: String,
+        pub title: Option<String>,
         pub account_number: Option<String>,
     }
 
