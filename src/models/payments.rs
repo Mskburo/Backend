@@ -45,7 +45,7 @@ pub mod response {
         pub description: Option<String>,
         pub recipient: Recipient,
         pub created_at: String,
-        pub confirmation: Option<Confirmation>,
+        pub confirmation: Confirmation,
         pub test: bool,
         pub paid: bool,
         pub refundable: bool,

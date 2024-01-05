@@ -190,8 +190,8 @@ async fn capture_payment(app_state: web::Data<AppState>, id: i32) -> HttpRespons
             {
                 Ok(response) => {
                     if response.status().is_success() {
-                        let res: PaymentDoneResponse =
-                            response.json::<PaymentDoneResponse>().await.unwrap();
+                        // let res: PaymentDoneResponse =
+                        //     response.json::<PaymentDoneResponse>().await.unwrap();
                         debug!("success payment capture");
                         match update_cart_status(&app_state.db, id).await {
                             Some(_) => {
