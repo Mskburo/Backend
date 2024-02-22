@@ -20,7 +20,7 @@ else
 fi
 
 # Build the Docker image
-docker compose -f ./build.docker-compose.yaml --env-file .env.rel build
+docker compose -f ./build.docker-compose.yaml --env-file .env build
 
 # Check if the build was successful
 if [ $? -eq 0 ]; then

@@ -11,7 +11,7 @@ pub struct Cart {
     pub name: String,
     pub tel: String,
     pub email: String,
-    pub bill: String,
+    pub bill: Option<String>,
     pub created_at: Option<chrono::DateTime<Utc>>,
     #[serde(skip_deserializing)]
     pub is_paid: Option<bool>,
@@ -26,7 +26,7 @@ pub struct CartWithTotalCost {
     pub name: String,
     pub tel: String,
     pub email: String,
-    pub bill: String,
+    pub bill: Option<String>,
     pub created_at: Option<chrono::DateTime<Utc>>,
     #[serde(skip_deserializing)]
     pub is_paid: Option<bool>,
