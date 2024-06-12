@@ -23,9 +23,13 @@ use controllers::{
     },
     excursion_controller::{
         add_excursion, delete_excursion_by_id, get_all_count_of_remaining_tickets,
-        get_all_excursions, get_excursion_by_id, update_excursion_by_id, get_excursion_types_by_id,
+        get_all_excursions, get_excursion_by_id, get_excursion_types_by_id, update_excursion_by_id,
     },
-    payments_controller::*, qrs_controller::{get_qrs_by_id, add_qrs, delete_qrs_by_id, increment_qrs_count_by_id, update_qr, get_all_qrs},
+    payments_controller::*,
+    qrs_controller::{
+        add_qrs, delete_qrs_by_id, get_all_qrs, get_qr_stats, get_qrs_by_id,
+        increment_qrs_count_by_id, update_qr,
+    },
 };
 
 use dotenv::dotenv;
@@ -51,7 +55,7 @@ pub struct HttpPaymentClient {
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
     let subscriber = FmtSubscriber::builder()
-        .with_max_level(Level::TRACE)
+        .with_max_level(Level::DEBUG)
         .finish();
     tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
 
@@ -109,6 +113,7 @@ async fn main() -> std::io::Result<()> {
                                 .service(get_all_qrs)
                                 .service(get_qrs_by_id)
                                 .service(delete_qrs_by_id)
+                                .service(get_qr_stats)
                                 .service(update_qr),
                         )
                         .service(

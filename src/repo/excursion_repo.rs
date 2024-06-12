@@ -1,11 +1,14 @@
-use serde::{Serialize, Deserialize};
-use sqlx::{FromRow, PgPool, Error};
+use serde::{Deserialize, Serialize};
+use sqlx::{Error, FromRow, PgPool};
 
-use crate::models::{excursion::{Excursion, ExcursionDetails, ExcursionQuery}, costs::CustomersTypeCostsReturn};
+use crate::models::{
+    costs::CustomersTypeCostsReturn,
+    excursion::{Excursion, ExcursionDetails, ExcursionQuery},
+};
 
-#[derive(Deserialize, Serialize,FromRow )]
-struct QueryHelper{
-    sold_tickets:i64
+#[derive(Deserialize, Serialize, FromRow)]
+struct QueryHelper {
+    sold_tickets: i64,
 }
 
 impl Excursion {
@@ -18,17 +21,17 @@ impl Excursion {
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
             RETURNING *;",
         )
-        .bind(&self.excursion_type_id,)
+        .bind(self.excursion_type_id,)
         .bind(&self.name,)
         .bind(&self.description,)
         .bind(&self.short_description,)
         .bind(&self.time,)
-        .bind(&self.available,)
+        .bind(self.available,)
         .bind(&self.photo,)
         .bind(&self.route,)
         .bind(&self.short_route,)
         .bind(&self.meeting_info,)
-        .bind(&self.is_active ,)
+        .bind(self.is_active ,)
         .bind(&self.times ,)
         .fetch_optional(connection)
         .await?;
@@ -97,20 +100,19 @@ impl Excursion {
     ) -> Result<u64, sqlx::Error> {
         let rows_affected = sqlx::query(
             "UPDATE excursions  SET excursion_type_id=$1, name=$2, description=$3, short_description=$4, time=$5, available=$6, photo=$7, route=$8, short_route=$9, meeting_info=$10, is_active=$11, times=$12 WHERE id = $13
-        ",
-            
+        "
         )
-        .bind(&self.excursion_type_id,)
+        .bind(self.excursion_type_id,)
         .bind(&self.name,)
         .bind(&self.description,)
         .bind(&self.short_description,)
         .bind(&self.time,)
-        .bind(&self.available,)
+        .bind(self.available,)
         .bind(&self.photo,)
         .bind(&self.route,)
         .bind(&self.short_route,)
         .bind(&self.meeting_info,)
-        .bind(&self.is_active ,)
+        .bind(self.is_active ,)
         .bind(&self.times ,)
         .bind(id,)
         .execute(connection)
@@ -141,8 +143,7 @@ impl Excursion {
                 carts.date = $3 AND
                 carts.time = $2 AND 
                 cart_to_costs_types.customer_type_cost_id = costs.id;
-        ",
-            
+        "
         )
         .bind(query.excursion_id,)
         .bind(query.time,)
@@ -152,14 +153,14 @@ impl Excursion {
         Ok(count.sold_tickets)
     }
 
-    pub async fn delete(&self,connection: &sqlx::Pool<sqlx::Postgres>) -> Result<(), sqlx::Error> {
+    pub async fn delete(&self, connection: &sqlx::Pool<sqlx::Postgres>) -> Result<(), sqlx::Error> {
         sqlx::query(
             "
             DELETE FROM excursions
             WHERE id = $1
             ",
         )
-        .bind(&self.id)
+        .bind(self.id)
         .execute(connection)
         .await?;
         Ok(())
@@ -169,7 +170,7 @@ impl Excursion {
         id: i32,
         connection: &sqlx::Pool<sqlx::Postgres>,
     ) -> Result<(), sqlx::Error> {
-         sqlx::query(
+        sqlx::query(
             "
             DELETE FROM excursions
             WHERE id = $1
@@ -181,7 +182,7 @@ impl Excursion {
         Ok(())
     }
 
-     pub async fn get_types_by_excursion_id(
+    pub async fn get_types_by_excursion_id(
         id: i32,
         connection: &PgPool,
     ) -> Result<Vec<CustomersTypeCostsReturn>, Error> {

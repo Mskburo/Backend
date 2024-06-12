@@ -18,7 +18,7 @@ pub async fn new_user_validator(
             .cloned()
             .unwrap_or_default()
             .scope("urn:example:channel=HBO&urn:example:rating=G,PG-13");
-        warn!("{:?}",  req);
+        warn!("{:?}", req);
         Err((AuthenticationError::from(config).into(), req))
     }
 }
@@ -48,7 +48,7 @@ async fn validator(
     match TokenClaims::get_token_claims(credentials.token()) {
         Ok(value) => {
             if value.token_type != token_type {
-               warn!("{:?}",  req);
+                warn!("{:?}", req);
                 return Err((
                     AuthenticationError::from(bearer::Config::default()).into(),
                     req,
@@ -56,7 +56,7 @@ async fn validator(
             }
 
             if value.exp < Utc::now().timestamp() as usize {
-                warn!("{:?}",  req);
+                warn!("{:?}", req);
                 return Err((
                     AuthenticationError::from(bearer::Config::default()).into(),
                     req,
@@ -72,7 +72,7 @@ async fn validator(
                 .cloned()
                 .unwrap_or_default()
                 .scope("");
-           warn!("{:?}",  req);
+            warn!("{:?}", req);
             Err((AuthenticationError::from(config).into(), req))
         }
     }

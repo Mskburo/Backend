@@ -34,7 +34,6 @@ pub struct ExcursionWithCosts {
     pub tickets: Vec<CustomersTypeCostsReturn>,
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct ExcursionDetails {
     #[serde(skip_deserializing)]
@@ -51,7 +50,7 @@ pub struct ExcursionDetails {
     pub meeting_info: Option<String>,
     pub is_active: Option<bool>,
     pub times: Vec<String>,
-    pub week_days:i32,
+    pub week_days: i32,
 }
 
 #[derive(Deserialize, Serialize)]

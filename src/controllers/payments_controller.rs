@@ -10,7 +10,6 @@ pub mod emails {
     tonic::include_proto!("emails");
 }
 
-use serde_json::json;
 use tracing::{debug, error};
 use uuid::Uuid;
 
@@ -18,7 +17,6 @@ use crate::{
     models::{
         cart::{Cart, InsertCart},
         payments::{
-            done_response::PaymentDoneResponse,
             request::{Amount, Confirmation, PaymentRequest},
             response::PaymentResponse,
             Payment,
@@ -36,32 +34,29 @@ async fn capture_webhook_event(
     let event = json.into_inner();
 
     match event.object.status {
-        WebhookEventType::Pending => return HttpResponse::Ok().body("ok"),
+        WebhookEventType::Pending => HttpResponse::Ok().body("ok"),
         WebhookEventType::WaitingForCapture => {
             match Payment::get_by_payment_id(event.object.id, &app_state.db).await {
                 Ok(payment) => match payment {
-                    Some(result) => return capture_payment(app_state, result.cart_id).await,
+                    Some(result) => capture_payment(app_state, result.cart_id).await,
                     None => {
                         error!("no payments found.");
-                        return HttpResponse::BadRequest().body(format!("error capturing payment"));
+                        HttpResponse::BadRequest().body("error capturing payment".to_string())
                     }
                 },
                 Err(e) => {
-                    return HttpResponse::BadRequest()
-                        .body(format!("error capturing payment \n {}", e));
-                }
-            };
-        }
-        WebhookEventType::Succeeded => {
-            match send_email(&event,app_state).await {
-                Ok(_) => HttpResponse::Ok().body("ok"),
-                Err(err) => {
-                    eprintln!("Error sending email: {:?}", err);
-
-                    HttpResponse::InternalServerError().body("Internal Server Error")
+                    HttpResponse::BadRequest().body(format!("error capturing payment \n {}", e))
                 }
             }
         }
+        WebhookEventType::Succeeded => match send_email(&event, app_state).await {
+            Ok(_) => HttpResponse::Ok().body("ok"),
+            Err(err) => {
+                eprintln!("Error sending email: {:?}", err);
+
+                HttpResponse::InternalServerError().body("Internal Server Error")
+            }
+        },
         WebhookEventType::Canceled => {
             match Payment::get_by_payment_id(event.object.id, &app_state.db).await {
                 Ok(payment) => match payment {
@@ -89,7 +84,8 @@ async fn capture_webhook_event(
                     }
                     None => {
                         error!("no payments found.");
-                        return HttpResponse::BadRequest().body(format!("error capturing payment"));
+                        return HttpResponse::BadRequest()
+                            .body("error capturing payment".to_string());
                     }
                 },
                 Err(e) => {
@@ -97,7 +93,7 @@ async fn capture_webhook_event(
                         .body(format!("error capturing payment \n {}", e));
                 }
             };
-            return HttpResponse::BadRequest().body(format!("error capturing payment"));
+            HttpResponse::BadRequest().body("error capturing payment".to_string())
         }
     }
 }
@@ -108,17 +104,15 @@ async fn capture_payment_by_id(
     input_id: web::Path<i32>,
 ) -> HttpResponse {
     let id = input_id.into_inner();
-    return capture_payment(app_state, id).await;
+    capture_payment(app_state, id).await
 }
 
 #[get("/email")]
 async fn send_email_test(app_state: web::Data<AppState>, json: web::Json<Webhook>) -> HttpResponse {
     let event = json.into_inner();
     match send_email(&event, app_state).await {
-        Ok(_) => return HttpResponse::Ok().body(format!("Email sent")),
-        Err(err) => {
-            return HttpResponse::BadRequest().body(format!("error capturing payment {}", err))
-        }
+        Ok(_) => HttpResponse::Ok().body("Email sent".to_string()),
+        Err(err) => HttpResponse::BadRequest().body(format!("error capturing payment {}", err)),
     }
 }
 
@@ -206,16 +200,15 @@ async fn capture_payment(app_state: web::Data<AppState>, id: i32) -> HttpRespons
                                     .finish();
                             }
                             None => {
-                                return HttpResponse::InternalServerError()
-                                    .body("cannot update cart staus")
+                                HttpResponse::InternalServerError().body("cannot update cart staus")
                             }
                         }
                     } else {
-                        return HttpResponse::BadRequest().body(format!(
+                        HttpResponse::BadRequest().body(format!(
                             "error capturing payment \n {} {}",
                             response.status(),
                             response.text().await.unwrap()
-                        ));
+                        ))
                     }
                 }
                 Err(e) => {
@@ -229,8 +222,8 @@ async fn capture_payment(app_state: web::Data<AppState>, id: i32) -> HttpRespons
 
 async fn update_cart_status(connetion: &sqlx::PgPool, cart_id: i32) -> Option<Cart> {
     match InsertCart::update_status_by_id(connetion, cart_id, true).await {
-        Ok(val) => return Some(val),
-        Err(_) => return None,
+        Ok(val) => Some(val),
+        Err(_) => None,
     }
 }
 
@@ -260,8 +253,7 @@ pub async fn create_payment(
                         return_url: format!(
                             "http://mskburo.ru/api/v1/payments/capture/{}",
                             insert_cart.cart_info.id.unwrap_or_default()
-                        )
-                        .to_owned(), //TODO add value
+                        ),
                     },
                     description: format!(
                         "Заказ №{}",
@@ -295,12 +287,10 @@ pub async fn create_payment(
                     return HttpResponse::BadRequest().body(format!("{}", e));
                 }
             };
-            return HttpResponse::InternalServerError()
-                .body(format!("{}", "Error while calculating final cost"));
+            HttpResponse::InternalServerError()
+                .body("Error while calculating final cost".to_string())
         }
-        Err(_) => {
-            return HttpResponse::InternalServerError()
-                .body(format!("{}", "Error while calculating final cost"))
-        }
+        Err(e) => HttpResponse::InternalServerError()
+            .body(format!("Error while calculating final cost {:?}", e)),
     }
 }

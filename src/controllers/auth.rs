@@ -7,7 +7,6 @@ use actix_web::{
 use actix_web_httpauth::extractors::{basic::BasicAuth, bearer::BearerAuth};
 use tracing::debug;
 
-
 use crate::models::user::*;
 use sqlx;
 

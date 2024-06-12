@@ -15,6 +15,7 @@ pub struct Cart {
     pub created_at: Option<chrono::DateTime<Utc>>,
     #[serde(skip_deserializing)]
     pub is_paid: Option<bool>,
+    pub promo_qr_id: Option<i32>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
@@ -34,6 +35,25 @@ pub struct CartWithTotalCost {
     pub excursion_id: Option<i32>,
     pub total_cost: f64,
     pub meeting_info: Option<String>,
+    pub promo_qr_id: Option<i32>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+pub struct CartWithTotalCostReduced {
+    #[serde(skip_deserializing)]
+    pub id: Option<i32>,
+    pub date: chrono::naive::NaiveDate,
+    pub time: String,
+    pub name: String,
+    pub tel: String,
+    pub email: String,
+    pub bill: Option<String>,
+    pub created_at: Option<chrono::DateTime<Utc>>,
+    #[serde(skip_deserializing)]
+    pub is_paid: Option<bool>,
+    pub excursion_name: Option<String>,
+    pub total_cost: f64,
+    pub promo_qr_id: Option<i32>,
 }
 
 #[derive(Deserialize, Serialize, FromRow)]

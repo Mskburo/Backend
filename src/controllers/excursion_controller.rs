@@ -1,6 +1,9 @@
 use actix_web::{delete, get, post, put, web, HttpResponse};
 
-use crate::models::{excursion::{Excursion, ExcursionQuery, ExcursionWithCosts}, costs::CustomersTypeCosts};
+use crate::models::{
+    costs::CustomersTypeCosts,
+    excursion::{Excursion, ExcursionQuery, ExcursionWithCosts},
+};
 use tracing::error;
 
 use crate::AppState;
@@ -12,7 +15,7 @@ async fn add_excursion(app_state: web::Data<AppState>, json: web::Json<Excursion
         Ok(result) => HttpResponse::Accepted().json(result),
         Err(e) => {
             error!("{}", e);
-            return HttpResponse::BadRequest().body(format!("{}", e));
+            HttpResponse::BadRequest().body(format!("{}", e))
         }
     }
 }
@@ -21,24 +24,26 @@ async fn add_excursion(app_state: web::Data<AppState>, json: web::Json<Excursion
 #[get("")]
 async fn get_all_excursions(app_state: web::Data<AppState>) -> HttpResponse {
     let excursions = match Excursion::get_all(&app_state.db).await {
-        Ok(result) =>result,
+        Ok(result) => result,
         Err(e) => {
             error!("{}", e);
             return HttpResponse::BadRequest().body(format!("{}", e));
         }
     };
-    let mut result :Vec<ExcursionWithCosts>= vec![];
+    let mut result: Vec<ExcursionWithCosts> = vec![];
     for excursion in excursions {
-        match CustomersTypeCosts::get_by_excursion_id(excursion.id.unwrap(),&app_state.db).await {
-        Ok(_result) =>result.push(ExcursionWithCosts{excursion,tickets: _result}),
-        Err(e) => {
-            error!("{}", e);
-            return HttpResponse::BadRequest().body(format!("{}", e));
-        }
-    };
-    };
-    return HttpResponse::Accepted().json(result);
-     
+        match CustomersTypeCosts::get_by_excursion_id(excursion.id.unwrap(), &app_state.db).await {
+            Ok(_result) => result.push(ExcursionWithCosts {
+                excursion,
+                tickets: _result,
+            }),
+            Err(e) => {
+                error!("{}", e);
+                return HttpResponse::BadRequest().body(format!("{}", e));
+            }
+        };
+    }
+    HttpResponse::Accepted().json(result)
 }
 #[get("/")]
 async fn get_all_count_of_remaining_tickets(
@@ -49,7 +54,7 @@ async fn get_all_count_of_remaining_tickets(
         Ok(result) => HttpResponse::Accepted().body(format!("{}", result)),
         Err(e) => {
             error!("{}", e);
-            return HttpResponse::BadRequest().body(format!("{}", e));
+            HttpResponse::BadRequest().body(format!("{}", e))
         }
     }
 }
@@ -64,7 +69,7 @@ async fn get_excursion_by_id(
         Ok(result) => HttpResponse::Accepted().json(result),
         Err(e) => {
             error!("{}", e);
-            return HttpResponse::BadRequest().body(format!("{}", e));
+            HttpResponse::BadRequest().body(format!("{}", e))
         }
     }
 }
@@ -79,7 +84,7 @@ async fn get_excursion_types_by_id(
         Ok(result) => HttpResponse::Accepted().json(result),
         Err(e) => {
             error!("{}", e);
-            return HttpResponse::BadRequest().body(format!("{}", e));
+            HttpResponse::BadRequest().body(format!("{}", e))
         }
     }
 }
@@ -95,7 +100,7 @@ async fn update_excursion_by_id(
         Ok(result) => HttpResponse::Accepted().body(format!("{} rows affected", result)),
         Err(e) => {
             error!("{}", e);
-            return HttpResponse::BadRequest().body(format!("{}", e));
+            HttpResponse::BadRequest().body(format!("{}", e))
         }
     }
 }
@@ -112,7 +117,7 @@ async fn delete_excursion_by_id(
         Ok(_) => HttpResponse::Accepted().body("deleted"),
         Err(e) => {
             error!("{}", e);
-            return HttpResponse::BadRequest().body(format!("{}", e));
+            HttpResponse::BadRequest().body(format!("{}", e))
         }
     }
 }

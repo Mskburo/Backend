@@ -1,6 +1,6 @@
 use sqlx::PgPool;
 
-use crate::models::{payments::Payment, cart::CartWithTotalCost};
+use crate::models::{cart::CartWithTotalCost, payments::Payment};
 
 impl Payment {
     pub async fn insert(&self, connection: &PgPool) -> Result<Payment, sqlx::Error> {
@@ -19,17 +19,10 @@ impl Payment {
         Ok(result)
     }
 
-    pub async fn get_by_id(
-        id: i32,
-        connection: &PgPool,
-    ) -> Result<Option<Payment>, sqlx::Error> {
-        let result = sqlx::query_as!(
-            Payment,
-            "SELECT * FROM payments WHERE cart_id = $1;",
-            id
-        )
-        .fetch_optional(connection)
-        .await?;
+    pub async fn get_by_id(id: i32, connection: &PgPool) -> Result<Option<Payment>, sqlx::Error> {
+        let result = sqlx::query_as!(Payment, "SELECT * FROM payments WHERE cart_id = $1;", id)
+            .fetch_optional(connection)
+            .await?;
 
         Ok(result)
     }
@@ -38,13 +31,9 @@ impl Payment {
         id: String,
         connection: &PgPool,
     ) -> Result<Option<Payment>, sqlx::Error> {
-        let result = sqlx::query_as!(
-            Payment,
-            "SELECT * FROM payments WHERE payment_id = $1;",
-            id
-        )
-        .fetch_optional(connection)
-        .await?;
+        let result = sqlx::query_as!(Payment, "SELECT * FROM payments WHERE payment_id = $1;", id)
+            .fetch_optional(connection)
+            .await?;
 
         Ok(result)
     }
@@ -65,14 +54,11 @@ impl Payment {
               LEFT JOIN customers_type_costs cost ON ctct.customer_type_cost_id = cost.id
               LEFT JOIN excursions ON cost.excursion_id = excursions.id
               WHERE p.payment_id = $1
-              GROUP BY c.id, excursions.name, excursions.id , excursions.meeting_info;",
-            
+              GROUP BY c.id, excursions.name, excursions.id , excursions.meeting_info;"
         ).bind(id)
         .fetch_optional(connection)
         .await?;
 
         Ok(result)
     }
-
-   
 }

@@ -11,12 +11,10 @@ use crate::AppState;
 #[put("")]
 async fn add_cart(app_state: web::Data<AppState>, json: web::Json<InsertCart>) -> HttpResponse {
     match json.into_inner().insert(&app_state.db).await {
-        Ok(result) => {
-            return create_payment(app_state, result).await;
-        }
+        Ok(result) => create_payment(app_state, result).await,
         Err(e) => {
             error!("{}", e);
-            return HttpResponse::BadRequest().body(format!("{}", e));
+            HttpResponse::BadRequest().body(format!("{}", e))
         }
     }
 }
@@ -38,12 +36,12 @@ async fn get_all_carts(
         Ok(result) => HttpResponse::Accepted().json(result),
         Err(e) => {
             error!("{}", e);
-            return HttpResponse::BadRequest().body(format!("{}", e));
+            HttpResponse::BadRequest().body(format!("{}", e))
         }
     }
 }
 
-// struct OrderResaponse{
+// struct OrderResponse{
 //     cart: carts,
 //     tickets: Vec<CustomersTypeCosts>
 // }
@@ -56,7 +54,7 @@ async fn get_cart_by_id(app_state: web::Data<AppState>, input_id: web::Path<i32>
         Ok(result) => HttpResponse::Accepted().json(result),
         Err(e) => {
             error!("{}", e);
-            return HttpResponse::BadRequest().body(format!("{}", e));
+            HttpResponse::BadRequest().body(format!("{}", e))
         }
     }
 }
@@ -74,17 +72,12 @@ async fn update_cart_payment_status(
 ) -> HttpResponse {
     let input_id = input_id.into_inner();
 
-    match InsertCart::update_status_by_id(
-        &app_state.db,
-        input_id,
-        query.into_inner().is_paid,
-    )
-    .await
+    match InsertCart::update_status_by_id(&app_state.db, input_id, query.into_inner().is_paid).await
     {
         Ok(result) => HttpResponse::Accepted().json(result),
         Err(e) => {
             error!("{}", e);
-            return HttpResponse::BadRequest().body(format!("{}", e));
+            HttpResponse::BadRequest().body(format!("{}", e))
         }
     }
 }

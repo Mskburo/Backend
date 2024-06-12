@@ -15,7 +15,7 @@ async fn add_customer_cost(
         Ok(result) => HttpResponse::Accepted().json(result),
         Err(e) => {
             error!("{}", e);
-            return HttpResponse::BadRequest().body(format!("{}", e));
+            HttpResponse::BadRequest().body(format!("{}", e))
         }
     }
 }
@@ -31,7 +31,7 @@ async fn get_customer_cost_by_excursion_id(
         Ok(result) => HttpResponse::Accepted().json(result),
         Err(e) => {
             error!("{}", e);
-            return HttpResponse::BadRequest().body(format!("{}", e));
+            HttpResponse::BadRequest().body(format!("{}", e))
         }
     }
 }
@@ -49,7 +49,7 @@ async fn update_customer_cost_by_id(
         Ok(result) => HttpResponse::Accepted().json(result),
         Err(e) => {
             error!("{}", e);
-            return HttpResponse::BadRequest().body(format!("{}", e));
+            HttpResponse::BadRequest().body(format!("{}", e))
         }
     }
 }
@@ -66,7 +66,7 @@ async fn delete_customer_cost_by_id(
         Ok(result) => HttpResponse::Accepted().json(result),
         Err(e) => {
             error!("{}", e);
-            return HttpResponse::BadRequest().body(format!("{}", e));
+            HttpResponse::BadRequest().body(format!("{}", e))
         }
     }
 }
