@@ -62,7 +62,7 @@ async fn get_qr_stats(
         qr_id,
         filter.year,
         filter.month,
-        filter.check_paid.unwrap_or(false),
+        filter.check_paid,
     )
     .await
     {

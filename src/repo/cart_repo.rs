@@ -169,7 +169,7 @@ impl InsertCart {
         qr_id: i32,
         year: Option<u16>,
         month: Option<u8>,
-        check_paid: bool,
+        check_paid: Option<bool>,
     ) -> Result<Vec<CartWithTotalCostReduced>, Error> {
         let year_str = year
             .map(|f| format!("TO_DATE('{}', 'YYYY')", f))
@@ -203,7 +203,7 @@ impl InsertCart {
             and extract(MONTH FROM created_at) = extract(MONTH FROM {})
             AND promo_qr_id IS NOT NULL
             AND promo_qr_id = {}
-            AND is_paid IS {}
+            {}
 
         GROUP BY c.id, excursions.name, cost.excursion_id, payments.payment_id, meeting_info
         ORDER BY created_at DESC
@@ -211,7 +211,13 @@ impl InsertCart {
             year_str,
             month_str,
             qr_id,
-            check_paid
+            {
+                match check_paid {
+                    Some(true) => "AND is_paid IS TRUE",
+                    Some(false) => "AND is_paid IS FALSE",
+                    None => "",
+                }
+            }
         );
         let carts = sqlx::query_as::<_, CartWithTotalCostReduced>(&query)
             .fetch_all(connection)
